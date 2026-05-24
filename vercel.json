@@ -17,8 +17,11 @@
       "dest": "/media/$1"
     },
     {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
-      "dest": "config/wsgi.py"
+      "dest": "/config/wsgi.py"
     }
   ]
 }
