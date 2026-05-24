@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wallet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../src/styles.css" />
+  </head>
+  <body>
+    <div class="panel-shell">
+      <aside class="sidebar">
+  <div class="brand">
+    <div class="logo-badge">SM</div>
+    <strong>SMM Panel</strong>
+  </div>
+  <div class="wallet-mini">
+    <div class="muted">Balance</div>
+    <div class="balance">$1,240.50</div>
+  </div>
+  <p class="nav-section-label">Navigation</p>
+  <a class="nav-link" href="./dashboard.html">Dashboard</a>
+  <a class="nav-link" href="./services.html">Services</a>
+  <a class="nav-link" href="./order-new.html">New Order</a>
+  <a class="nav-link" href="./orders.html">Orders</a>
+  <a class="nav-link active" href="./wallet.html">Wallet</a>
+  <a class="nav-link" href="./wallet-deposit.html">Deposit</a>
+  <a class="nav-link" href="./wallet-transactions.html">Transactions</a>
+  <a class="nav-link" href="./tts.html">TTS Generator</a>
+  <a class="nav-link" href="./tts-history.html">TTS History</a>
+  <a class="nav-link" href="./notifications.html">Notifications</a>
+  <a class="nav-link" href="./admin.html">Admin Analytics</a>
+  <a class="nav-link" href="./admin-users.html">Admin Users</a>
+  <a class="nav-link" href="./admin-services.html">Admin Services</a>
+  <a class="nav-link" href="./admin-orders.html">Admin Orders</a>
+  <div class="sidebar-footer">
+    <a class="btn btn-outline" style="display:block;text-align:center;text-decoration:none;" href="./login.html">Sign out</a>
+  </div>
+</aside>
+      <div class="main-area">
+        <header class="topbar">
+          <strong>Vanilla HTML Mode</strong>
+          <div class="top-actions">
+            <a class="btn btn-outline" style="text-decoration:none;" href="../index.html">Home</a>
+            <button class="icon-btn" type="button" aria-label="Theme">T</button>
+          </div>
+        </header>
+        <main class="content">
+          <div class="page-header">
+            <h1>Wallet</h1>
+            <p>Manage your funds</p>
+          </div>
+          <div style="height:12px"></div>
+          <div class="card pad">
+  <div class="muted">Available Balance</div>
+  <div class="stat-value">$1,240.50</div>
+</div>
+<div style="height:12px"></div>
+<div class="cards-grid cols-4">
+  <div class="card pad"><div class="stat-title">Total Deposited</div><div class="stat-value">$4,120</div></div>
+  <div class="card pad"><div class="stat-title">Total Spent</div><div class="stat-value">$2,600</div></div>
+  <div class="card pad"><div class="stat-title">Refunds</div><div class="stat-value">$145</div></div>
+  <div class="card pad"><div class="stat-title">Deposits</div><div class="stat-value">24</div></div>
+</div>
+<div style="height:12px"></div>
+<div class="quick-actions">
+  <a class="btn btn-primary" style="text-decoration:none;" href="./wallet-deposit.html">Add Funds</a>
+  <a class="btn btn-outline" style="text-decoration:none;" href="./wallet-transactions.html">View Transactions</a>
+</div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

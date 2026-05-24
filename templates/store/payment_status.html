@@ -1,0 +1,20 @@
+{% extends "partials/base.html" %}
+{% block title %}{{ title }}{% endblock title %}
+{% block content %}
+<div class="page-header">
+  <h1>{{ title }}</h1>
+  <p>{{ message }}</p>
+</div>
+<div class="card pad">
+  <div class="list">
+    <div class="list-item flex-between"><span>Order</span><strong>#{{ order.id }}</strong></div>
+    <div class="list-item flex-between"><span>Service</span><strong>{{ order.service.name }}</strong></div>
+    <div class="list-item flex-between"><span>Quantity</span><strong>{{ order.quantity }}</strong></div>
+    <div class="list-item flex-between"><span>Total</span><strong>₦{{ order.total_price }}</strong></div>
+    <div class="list-item flex-between"><span>Status</span><strong>{{ order.get_status_display }}</strong></div>
+  </div>
+  <div style="margin-top: 1rem;">
+    <a class="btn btn-primary" href="{% url 'store:create_order' %}">Place Another Order</a>
+  </div>
+</div>
+{% endblock content %}

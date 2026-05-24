@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Email</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  </head>
+  <body>
+    {% comment %} alert {% endcomment %}
+    {% if messages %}
+      <div class="alert-container">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    <div class="auth-shell">
+      <div class="auth-card">
+        <div class="logo-badge">SM</div>
+        <h1 class="auth-title text-center">Edit Email</h1>
+        <p class="auth-subtitle text-center">Update your email address</p>
+        <form class="form-stack"  method="post">
+          {% csrf_token %}
+          
+          <div class="field">
+            <label>Edit Email</label>
+            <input class="input" type="email" placeholder="Enter new email address" name="email" required />
+          </div>
+          <button class="btn btn-primary" type="submit">Update Email</button>
+        </form>
+        {% comment %} <p class="auth-footer">No account? <a href="{% url "register" %}">Create one</a></p> {% endcomment %}
+      </div>
+    </div>
+  </body>
+</html>

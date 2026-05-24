@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+  <body>
+    
+    <div class="auth-shell">
+      <div class="auth-card">
+        <div class="logo-badge">SM</div>
+        <h1 class="auth-title text-center">Sign in</h1>
+        <p class="auth-subtitle text-center">Access your SMM and TTS dashboard</p>
+        <form class="form-stack"  method="post">
+          {% csrf_token %}
+          <div class="field">
+            <label>Email</label>
+            <input class="input" type="email" placeholder="you@example.com" name="email" required />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input class="input" type="password" placeholder="password" name="password" required />
+          </div>
+          <button class="btn btn-primary" type="submit">Sign in</button>
+        </form>
+        <p class="auth-footer">No account? <a href="{% url "register" %}">Create one</a></p>
+      </div>
+    </div>
+    <script type="module" src="{% static "js/index.js" %}"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script  src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function() {
+            {% if messages %}
+                {% for message in messages %}
+                    Swal.fire({
+                        icon: '{% if message.tags == "success" %}success{% elif message.tags == "error" %}error{% else %}info{% endif %}',
+                        title: '{{ message }}',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+  </body>
+</html>

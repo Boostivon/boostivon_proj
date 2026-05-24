@@ -1,0 +1,92 @@
+{% extends "partials/base.html" %} {% load static %}
+{% block title %}
+Dashboard
+{% endblock title %}
+{% block content %}
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <p>Overview of account activity</p>
+</div>
+<div style="height: 12px"></div>
+<div class="cards-grid cols-4">
+  <div class="card pad">
+    <div class="stat-title">Wallet Balance</div>
+    {% comment %} <div class="stat-value">&#8358;1,240.50</div> {% endcomment %}
+    <div class="stat-value">Coming Soon</div>
+  </div>
+  <div class="card pad">
+    <div class="stat-title">Total Orders</div>
+    <div class="stat-value">
+      {% if orders %}
+        {{ orders.count }}
+      {% else %}
+        0
+      {% endif %}
+    </div>
+  </div>
+  <div class="card pad">
+    <div class="stat-title">Completed</div>
+    <div class="stat-value">
+      {% if orders %}
+        {{ completed_orders_count }}
+      {% else %}
+        0
+      {% endif %}
+    </div>
+  </div>
+  <div class="card pad">
+    <div class="stat-title">TTS Jobs</div>
+    <div class="stat-value">32</div>
+  </div>
+</div>
+<div style="height: 12px"></div>
+<div class="quick-actions">
+  <a
+    class="btn btn-primary"
+    style="text-decoration: none"
+    href="{% url "store:create_order" %}"
+    >Place Order</a
+  >
+  <a
+    class="btn btn-outline"
+    style="text-decoration: none"
+    href="./wallet-deposit.html"
+    >Add Funds</a
+  >
+  <a
+    class="btn btn-outline"
+    style="text-decoration: none"
+    href="./tts.html"
+    >Generate TTS</a
+  >
+</div>
+<div style="height: 12px"></div>
+<div class="cards-grid cols-2">
+  <div class="card pad">
+    <h3 style="margin-top: 0">Order Status</h3>
+    <div class="list">
+      <div class="list-item flex-between">
+        <span>Pending</span><strong>4</strong>
+      </div>
+      <div class="list-item flex-between">
+        <span>Processing</span><strong>2</strong>
+      </div>
+      <div class="list-item flex-between">
+        <span>Completed</span><strong>48</strong>
+      </div>
+      <div class="list-item flex-between">
+        <span>Cancelled</span><strong>2</strong>
+      </div>
+    </div>
+  </div>
+  <div class="card pad">
+    <h3 style="margin-top: 0">Recent Activity</h3>
+    <div class="list">
+      <div class="list-item">Order #1250 placed 2 hours ago</div>
+      <div class="list-item">Deposit of $100 completed yesterday</div>
+      <div class="list-item">TTS job generated 3 minutes ago</div>
+      <div class="list-item">Order #1241 completed 1 day ago</div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

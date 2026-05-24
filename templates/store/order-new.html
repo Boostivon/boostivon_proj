@@ -1,0 +1,58 @@
+{% extends "partials/base.html" %} {% load static %}
+{% block title %}Place Order{% endblock title %}
+{% block content %}
+<div class="page-header">
+  <h1>Place Order</h1>
+  <p>Create a new SMM order</p>
+</div>
+<div style="height: 12px"></div>
+<div class="cards-grid cols-2">
+  <div class="card pad">
+    <h3 style="margin-top: 0">Place New Order</h3>
+    <form class="form-stack" method="post">
+      {% csrf_token %}
+      <div class="field">
+        <label>Service</label
+        >
+        {{ form.service }}
+      </div>
+      <div class="field">
+        <label>Target URL</label>
+        {{ form.target_link }}
+      </div>
+      <div class="field">
+        <label>Quantity</label
+        >
+        {{ form.quantity }}
+      </div>
+      <strong><small>
+        Allowed quantity: 50 - 100000
+      </small></strong>
+      <div class="field">
+        <label>Total Price</label
+        >
+        <input id="id_total_price_" type="text" name="total_price_" class="input" readonly>
+      </div>
+      <button class="btn btn-primary" type="submit">
+        Place Order
+      </button>
+    </form>
+  </div>
+  <div class="card pad">
+    <h3 style="margin-top: 0">Pricing Preview</h3>
+    <div class="list">
+      <div class="list-item flex-between">
+        <span>Price per 1K</span><strong id="id_price_per_k"></strong>
+      </div>
+      <div class="list-item flex-between">
+        <span>Quantity</span><strong id="id_quantity_preview"></strong>
+      </div>
+      <div class="list-item flex-between">
+        <span>Total</span><strong id="id_total_preview" class="text-success"></strong>
+      </div>
+      {% comment %} <div class="list-item">Available balance: $1,240.50</div> {% endcomment %}
+    </div>
+  </div>
+</div>
+{% endblock content %}
+ 

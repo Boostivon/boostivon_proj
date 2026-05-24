@@ -1,0 +1,50 @@
+{% extends "partials/base.html" %} {% load static %}
+{% block title %}
+Order Detail
+{% endblock title %}
+{% block content %}
+          <div class="page-header">
+            <h1>Order Detail</h1>
+            <p>Detailed order view</p>
+          </div>
+          <div style="height: 12px"></div>
+          <a
+            class="btn btn-outline"
+            style="text-decoration: none"
+            href="{% url "store:orders" %}"
+            >Back to Orders</a
+          >
+          <div style="height: 12px"></div>
+          <div class="card pad">
+            <div class="flex-between">
+              <h3 style="margin: 0">Order #{{ order.id }}</h3>
+              <span class="badge {{ order.status|lower }}">
+                {{ order.get_status_display }}
+              </span>
+            </div>
+            <div style="height: 12px"></div>
+            <div class="split">
+              <div class="list-item">
+                <div class="muted">Service</div>
+                <strong>{{ order.service.name }}</strong>
+              </div>
+              <div class="list-item">
+                <div class="muted">Platform</div>
+                <strong>{{ order.service.platform }}</strong>
+              </div>
+              <div class="list-item">
+                <div class="muted">Quantity</div>
+                <strong>{{ order.quantity }}</strong>
+              </div>
+              <div class="list-item">
+                <div class="muted">Total</div>
+                <strong>${{ order.total_price|floatformat:2 }}</strong>
+              </div>
+            </div>
+            <div style="height: 12px"></div>
+            <div class="list-item">
+              <div class="muted">Target URL</div>
+              <a href="{{ order.target_link }}" target="_blank">{{ order.target_link }}</a>
+            </div>
+          </div>
+{% endblock content %}
