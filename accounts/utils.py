@@ -3,7 +3,9 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
 from .models import EmailVerification, PasswordReset
+import resend
 
+resend.api_key = settings.RESEND_API_KEY
 
 def send_verification_code(user, verification_code):
     """
@@ -58,14 +60,13 @@ Boostivon
     """
     
     try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
+        params: resend.Emails.SendParams = {
+            "from": f"Boostivon <{settings.DEFAULT_FROM_EMAIL}>",
+            "to": [user.email],
+            "subject": subject,
+            "html": html_message,
+        }
+        resend.Emails.send(params)
         return True
     except Exception as e:
         print(f"Failed to send verification email to {user.email}: {str(e)}")
@@ -117,14 +118,13 @@ If you did not request a password reset, please ignore this email.
 Boostivon
     """
     try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
+        params: resend.Emails.SendParams = {
+            "from": f"Boostivon <{settings.DEFAULT_FROM_EMAIL}>",
+            "to": [user.email],
+            "subject": subject,
+            "html": html_message,
+        }
+        resend.Emails.send(params)
         return True
     except Exception as e:
         print(f"Failed to send password reset email to {user.email}: {str(e)}")

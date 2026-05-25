@@ -126,6 +126,7 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 FLUTTERWAVE_SECRET_KEY = os.getenv('FLUTTERWAVE_SECRET_KEY')
 API_URL = os.getenv('API_URL')
 OWLET_API_KEY = os.getenv('OWLET_API_KEY')
+RESEND_API_KEY = os.getenv('RESEND_API_KEY')
 
 # AWS / S3 settings (Supabase-compatible)
 if USE_S3:

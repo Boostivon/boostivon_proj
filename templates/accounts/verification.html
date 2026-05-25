@@ -13,18 +13,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
   <body>
-    {% comment %} alert {% endcomment %}
-    {% if messages %}
-      <div class="alert-container">
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
     
     <div class="auth-shell">
       <div class="auth-card">
-        <div class="logo-badge">SM</div>
+        <div class="logo-badge bg-gradient text-white">SM</div>
         <h1 class="auth-title text-center">Verify Email</h1>
         <p class="auth-subtitle text-center">Access your SMM and TTS dashboard</p>
         <div class="form-stack">
@@ -32,7 +24,7 @@
             <label>Verification Code</label>
             <input class="input" type="email" placeholder="{{ request.user.email }}" readonly />
           </div>
-            <button class="btn btn-primary" id="send-verification">Send Code</button>
+            <button class="btn btn-primary btn-gradient" id="send-verification">Send Code</button>
         </div>
         <p class="auth-footer">Incorrect email? <a href="{% url "edit_email" %}">Edit Email</a></p>
       </div>
@@ -41,5 +33,19 @@
     <script type="module" src="{% static "js/index.js" %}"></script>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script  src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function() {
+            {% if messages %}
+                {% for message in messages %}
+                    Swal.fire({
+                        icon: '{% if message.tags == "success" %}success{% elif message.tags == "error" %}error{% else %}info{% endif %}',
+                        title: '{{ message }}',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
   </body>
 </html>

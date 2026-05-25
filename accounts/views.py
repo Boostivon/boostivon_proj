@@ -65,7 +65,6 @@ def register(request):
     return render(request, 'accounts/register.html', context)
 
 def login_view(request):
-    print(settings.FLUTTERWAVE_SECRET_KEY)
     if request.user.is_authenticated:
         messages.info(request, 'You are already logged in.')
         return redirect('home')
