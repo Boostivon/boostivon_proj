@@ -14,7 +14,9 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_
 USE_S3 = os.getenv('USE_S3', 'True').lower() in ('1', 'true', 'yes')
 
 # Static file storage for production
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = (
+    'whitenoise.storage.CompressedManifestStaticFilesStorage'
+)
 
 # Security
 SESSION_COOKIE_SECURE = True
