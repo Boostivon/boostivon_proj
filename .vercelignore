@@ -1,0 +1,9 @@
+# Ignore local development files and node_modules in Vercel deployments
+node_modules/
+static/js/node_modules/
+venv/
+.env
+db.sqlite3
+staticfiles/
+__pycache__/
+*.pyc

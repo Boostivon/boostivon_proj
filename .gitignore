@@ -4,3 +4,5 @@ test.py
 .env
 venv
 db.sqlite3
+node_modules/
+static/js/node_modules/

@@ -1,4 +1,4 @@
-import Swal from  './node_modules/sweetalert2/src/sweetalert2.js';
+import Swal from './vendor/sweetalert2.esm.all.min.js';
 
 function getCookie(name) {
     let cookieValue = null;
