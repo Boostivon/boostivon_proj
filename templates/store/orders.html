@@ -42,7 +42,7 @@
                     <td>{{ order.id }}</td>
                     <td>{{ order.service.name }}</td>
                     <td class="text-right">{{ order.quantity }}</td>
-                    <td class="text-right">{{ order.total_price }}</td>
+                    <td class="text-right">₦{{ order.total_price }}</td>
 
                   <td><span class="badge {{ order.get_status_display|lower }}">{{ order.get_status_display }}</span></td>
                   <td>

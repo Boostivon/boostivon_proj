@@ -43,14 +43,14 @@
         </div>
         <p class="nav-section-label">Navigation</p>
         <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url "home" %}">Dashboard</a>
-        <a class="nav-link {% if 'service' in request.path %}active{% endif %}" href="{% url "store:service_list" %}">Services</a>
+        {% comment %} <a class="nav-link {% if 'service' in request.path %}active{% endif %}" href="{% url "store:service_list" %}">Services</a> {% endcomment %}
         <a class="nav-link" href="{% url "store:create_order" %}">Boost Social Media</a>
         <a class="nav-link {% if 'order' in request.path %}active{% endif %}" href="{% url "store:orders" %}">Orders</a>
         <a class="nav-link" href="./wallet.html">Wallet</a>
         {% comment %} <a class="nav-link" href="./wallet-deposit.html">Deposit</a> {% endcomment %}
         {% comment %} <a class="nav-link" href="./wallet-transactions.html">Transactions</a> {% endcomment %}
-        <a class="nav-link" href="./tts.html">Text To Speech Generator</a>
-        <a class="nav-link" href="./tts-history.html">Text To Speech History</a>
+        {% comment %} <a class="nav-link" href="./tts.html">Text To Speech Generator</a> {% endcomment %}
+        {% comment %} <a class="nav-link" href="./tts-history.html">Text To Speech History</a> {% endcomment %}
         <a class="nav-link" href="./notifications.html">Notifications</a>
         {% comment %} <a class="nav-link" href="./admin.html">Admin Analytics</a>
         <a class="nav-link" href="./admin-users.html">Admin Users</a>

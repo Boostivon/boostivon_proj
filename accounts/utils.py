@@ -98,7 +98,7 @@ def send_password_reset_email(request, user, password_reset):
             <p>This link expires in 30 minutes and can only be used once.</p>
             <p>If you did not request a password reset, please ignore this email.</p>
             <hr>
-            <p style="color:#666;font-size:0.9em">Boostivon • {settings.ALLOWED_HOSTS[0] if settings.ALLOWED_HOSTS else 'boostivon.com'}</p>
+            <p style="color:#666;font-size:0.9em">Boostivon • www.boostivon.com.ng</p>
         </body>
     </html>
     """
