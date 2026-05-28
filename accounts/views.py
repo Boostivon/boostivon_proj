@@ -394,51 +394,158 @@ def edit_profile(request):
 
 
 
+# @csrf_exempt
+# def resend_webhook(request):
+#     if request.method == "POST":
+#         payload = json.loads(request.body)
+#         event_data = payload.get('data', payload)
+#         if payload.get('type') != 'email.received' and event_data.get('email_id') is None:
+#             return JsonResponse({'error': 'Unhandled event type'}, status=400)
+
+#         sender = event_data.get('from', '')
+#         subject = event_data.get('subject', '') or '(No subject)'
+#         body = event_data.get('text', '') or event_data.get('html', '') or ''
+#         email_id = event_data.get('email_id')
+#         message_id = event_data.get('message_id')
+#         to_addresses = event_data.get('to', []) or []
+#         cc_addresses = event_data.get('cc', []) or []
+#         bcc_addresses = event_data.get('bcc', []) or []
+#         attachments = event_data.get('attachments', []) or []
+#         created_at = event_data.get('created_at') or payload.get('created_at')
+
+#         received_at = parse_datetime(created_at) if created_at else None
+#         if received_at is None:
+#             received_at = timezone.now()
+#         elif timezone.is_naive(received_at):
+#             received_at = timezone.make_aware(received_at, timezone=timezone.utc)
+
+#         defaults = {
+#             'sender': sender,
+#             'message_id': message_id,
+#             'subject': subject,
+#             'body': body,
+#             'recipients': to_addresses,
+#             'cc': cc_addresses,
+#             'bcc': bcc_addresses,
+#             'attachments': attachments,
+#             'received_at': received_at,
+#         }
+
+#         if email_id:
+#             ReceivedEmail.objects.update_or_create(email_id=email_id, defaults=defaults)
+#         else:
+#             ReceivedEmail.objects.create(**defaults)
+
+#         return JsonResponse({'success': True})
+
+#     return JsonResponse({'error': 'Invalid request'}, status=405)
+
 @csrf_exempt
 def resend_webhook(request):
-    if request.method == "POST":
+    if request.method != "POST":
+        return JsonResponse(
+            {"error": "Invalid request method"},
+            status=405
+        )
+
+    try:
         payload = json.loads(request.body)
-        event_data = payload.get('data', payload)
-        if payload.get('type') != 'email.received' and event_data.get('email_id') is None:
-            return JsonResponse({'error': 'Unhandled event type'}, status=400)
 
-        sender = event_data.get('from', '')
-        subject = event_data.get('subject', '') or '(No subject)'
-        body = event_data.get('text', '') or event_data.get('html', '') or ''
-        email_id = event_data.get('email_id')
-        message_id = event_data.get('message_id')
-        to_addresses = event_data.get('to', []) or []
-        cc_addresses = event_data.get('cc', []) or []
-        bcc_addresses = event_data.get('bcc', []) or []
-        attachments = event_data.get('attachments', []) or []
-        created_at = event_data.get('created_at') or payload.get('created_at')
+        print(json.dumps(payload, indent=2))  # Debug payload
 
-        received_at = parse_datetime(created_at) if created_at else None
+        event_type = payload.get("type")
+
+        if event_type != "email.received":
+            return JsonResponse(
+                {"error": "Unhandled event type"},
+                status=400
+            )
+
+        data = payload.get("data", {})
+
+        # Some webhook versions nest content under "email"
+        email_data = data.get("email", data)
+
+        sender = email_data.get("from", "")
+
+        subject = email_data.get("subject") or "(No subject)"
+
+        text_body = email_data.get("text")
+        html_body = email_data.get("html")
+
+        # Prefer plain text first
+        if text_body:
+            body = text_body
+
+        # Convert HTML to plain text if text version is missing
+        elif html_body:
+            body = BeautifulSoup(
+                html_body,
+                "html.parser"
+            ).get_text()
+
+        else:
+            body = ""
+
+        email_id = (
+            email_data.get("email_id")
+            or email_data.get("id")
+        )
+
+        message_id = email_data.get("message_id", "")
+
+        recipients = email_data.get("to", []) or []
+        cc = email_data.get("cc", []) or []
+        bcc = email_data.get("bcc", []) or []
+        attachments = email_data.get("attachments", []) or []
+
+        created_at = (
+            email_data.get("created_at")
+            or payload.get("created_at")
+        )
+
+        received_at = (
+            parse_datetime(created_at)
+            if created_at else None
+        )
+
         if received_at is None:
             received_at = timezone.now()
+
         elif timezone.is_naive(received_at):
-            received_at = timezone.make_aware(received_at, timezone=timezone.utc)
+            received_at = timezone.make_aware(received_at)
 
         defaults = {
-            'sender': sender,
-            'message_id': message_id,
-            'subject': subject,
-            'body': body,
-            'recipients': to_addresses,
-            'cc': cc_addresses,
-            'bcc': bcc_addresses,
-            'attachments': attachments,
-            'received_at': received_at,
+            "sender": sender,
+            "message_id": message_id,
+            "subject": subject,
+            "body": body,
+            "recipients": recipients,
+            "cc": cc,
+            "bcc": bcc,
+            "attachments": attachments,
+            "received_at": received_at,
         }
 
         if email_id:
-            ReceivedEmail.objects.update_or_create(email_id=email_id, defaults=defaults)
+            ReceivedEmail.objects.update_or_create(
+                email_id=email_id,
+                defaults=defaults
+            )
         else:
             ReceivedEmail.objects.create(**defaults)
 
-        return JsonResponse({'success': True})
+        return JsonResponse({
+            "success": True,
+            "body_preview": body[:100]
+        })
 
-    return JsonResponse({'error': 'Invalid request'}, status=405)
+    except Exception as e:
+        print("Webhook Error:", str(e))
+
+        return JsonResponse({
+            "error": str(e)
+        }, status=500)
 
 @login_required(login_url='login')
 def inbox(request):

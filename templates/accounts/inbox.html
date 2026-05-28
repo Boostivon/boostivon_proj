@@ -34,13 +34,13 @@
                 </div>
                 </div>
             </div>
-            <div style="margin-top: 0.75rem; white-space: pre-wrap;">{{ email.body|linebreaks }}</div>
+            {% comment %} <div style="margin-top: 0.75rem; white-space: pre-wrap;">{{ email.body|linebreaks }}</div>
             {% if email.message_id or email.email_id %}
             <div class="muted" style="margin-top: 0.75rem; font-size: 0.85rem;">
                 {% if email.message_id %}Message ID: {{ email.message_id }}<br>{% endif %}
                 {% if email.email_id %}Email ID: {{ email.email_id }}{% endif %}
             </div>
-            {% endif %}
+            {% endif %} {% endcomment %}
             </div>
         {% endfor %}
         </div>
