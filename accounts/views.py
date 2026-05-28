@@ -423,10 +423,11 @@ def resend_webhook(request):
                 full_email = response.json()
         except requests.RequestException:
             pass  # Fall back to event_data if fetch fails
-
+    
+    email = resend.Emails.Receiving.get(email_id) if email_id else None
     sender      = full_email.get('from', '')
     subject     = full_email.get('subject', '') or '(No subject)'
-    body        = full_email.get('text', '') or full_email.get('html', '') or ''
+    body        = email['html'] or email['text'] or ''
     message_id  = full_email.get('message_id', '')
     to_addresses  = full_email.get('to', []) or []
     cc_addresses  = full_email.get('cc', []) or []
