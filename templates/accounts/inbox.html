@@ -1,0 +1,32 @@
+{% extends "partials/base.html" %} {% load static %}
+{% block title %}Received Emails{% endblock title %}
+{% block content %}
+    <div class="page-header">
+        <h1>Received Emails</h1>
+        <p>View emails received through the platform's email integration.</p>
+    </div>
+    
+    {% if emails %}
+        <div class="list" style="margin-top: 1rem;">
+        {% for email in emails %}
+            <div class="list-item">
+            <div class="flex-between">
+                <div>
+                <strong>{{ email.subject }}</strong><br>
+                <span class="muted">{{ email.sender }} → {{ email.subject }}</span><br>
+                <span class="muted">{{ email.created_at|date:"M d, Y H:i" }}</span>
+                </div>
+                <div>
+                {% if email.attachments %}
+                    <a href="{{ email.attachments.0.url }}" class="btn btn-sm btn-outline">View Attachment</a>
+                {% endif %}
+                </div>
+            </div>
+            <p style="margin-top: 0.5rem;">{{ email.body|linebreaks }}</p>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}  
+        <p class="muted" style="margin-top: 1rem;">No emails received yet.</p>
+    {% endif %}
+{% endblock content %}

@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from accounts.models import EmailVerification, PasswordReset
+import resend
 from store.models import Order, Platform, SocialMediaAccount, TextToSpeechRequest, Service, Transaction
 from store.views import orders
 from .utils import send_verification_code, send_password_reset_email
@@ -11,11 +12,15 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db.models import Count, Q, Sum
 from decimal import Decimal
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import ReceivedEmail
 
-USE_SUPABASE = getattr(settings, 'USE_SUPABASE', False)
 from .forms import UserRegisterForm
 
 User = get_user_model()
+RESEND_API_KEY = settings.RESEND_API_KEY
 
 # Create your views here.
 def custom_404_view(request, exception):
@@ -72,7 +77,6 @@ def register(request):
     return render(request, 'accounts/register.html', context)
 
 def login_view(request):
-    print(USE_SUPABASE)
     if request.user.is_authenticated:
         messages.info(request, 'You are already logged in.')
         return redirect('home')
@@ -386,3 +390,36 @@ def edit_profile(request):
         return redirect('profile')
     
     return render(request, 'accounts/edit_profile.html', {'user': request.user})
+
+
+
+@csrf_exempt
+def resend_webhook(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        sender = data.get("from", "")
+        subject = data.get("subject", "")
+        body = data.get("text", "")
+
+        ReceivedEmail.objects.create(
+            sender=sender,
+            subject=subject,
+            body=body
+        )
+
+        return JsonResponse({"success": True})
+
+    return JsonResponse({"error": "Invalid request"})
+
+@login_required(login_url='login')
+def inbox(request):
+    if request.user.role != 'admin':
+        messages.error(request, 'You do not have permission to access this page.')
+        return redirect('home')
+    
+    emails = ReceivedEmail.objects.all().order_by('-received_at')
+
+    return render(request, 'accounts/inbox.html', {
+        'emails': emails
+    })
