@@ -1,0 +1,56 @@
+{% extends "partials/base.html" %} {% load static %}
+{% block title %}Email detail{% endblock title %}
+{% block content %}
+  <div class="page-header">
+    <h1>Email message</h1>
+    <p>Full received email details.</p>
+  </div>
+
+  <div class="cards-grid cols-1" style="margin-top: 1rem;">
+    <div class="card pad">
+      <div class="flex-between" style="gap: 1rem; align-items: flex-start;">
+        <div style="min-width: 0; flex: 1;">
+          <h2 style="margin: 0;">{{ email.subject }}</h2>
+          <div class="muted">From: {{ email.sender }}</div>
+          <div class="muted">To: {{ email.recipients|join:", " }}</div>
+          {% if email.cc %}
+            <div class="muted">Cc: {{ email.cc|join:", " }}</div>
+          {% endif %}
+          {% if email.bcc %}
+            <div class="muted">Bcc: {{ email.bcc|join:", " }}</div>
+          {% endif %}
+          <div class="muted">Received: {{ email.received_at|date:"M d, Y H:i" }}</div>
+        </div>
+        <a class="btn btn-outline" href="{% url 'inbox' %}">Back to inbox</a>
+      </div>
+
+      <div class="list" style="margin-top: 1rem;">
+        {% if email.attachments %}
+          <div class="list-item">
+            <strong>Attachments</strong>
+            <div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+              {% for attachment in email.attachments %}
+                <span class="badge">{{ attachment.filename|default:attachment.name|default:"Attachment" }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="list-item">
+          <strong>Message ID</strong>
+          <div class="muted">{{ email.message_id }}</div>
+        </div>
+
+        <div class="list-item">
+          <strong>Email ID</strong>
+          <div class="muted">{{ email.email_id }}</div>
+        </div>
+      </div>
+
+      <div class="card pad" style="margin-top: 1rem;">
+        <h3 style="margin-top: 0;">Message body</h3>
+        <div style="white-space: pre-wrap; margin-top: 0.75rem;">{{ email.body|linebreaks }}</div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

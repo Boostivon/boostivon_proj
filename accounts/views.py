@@ -3,6 +3,8 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from accounts.models import EmailVerification, PasswordReset
 import resend
 from store.models import Order, Platform, SocialMediaAccount, TextToSpeechRequest, Service, Transaction
@@ -13,7 +15,6 @@ from django.conf import settings
 from django.db.models import Count, Q, Sum
 from decimal import Decimal
 import json
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import ReceivedEmail
 
@@ -396,21 +397,48 @@ def edit_profile(request):
 @csrf_exempt
 def resend_webhook(request):
     if request.method == "POST":
-        data = json.loads(request.body)
+        payload = json.loads(request.body)
+        event_data = payload.get('data', payload)
+        if payload.get('type') != 'email.received' and event_data.get('email_id') is None:
+            return JsonResponse({'error': 'Unhandled event type'}, status=400)
 
-        sender = data.get("from", "")
-        subject = data.get("subject", "")
-        body = data.get("text", "")
+        sender = event_data.get('from', '')
+        subject = event_data.get('subject', '') or '(No subject)'
+        body = event_data.get('text', '') or event_data.get('html', '') or ''
+        email_id = event_data.get('email_id')
+        message_id = event_data.get('message_id')
+        to_addresses = event_data.get('to', []) or []
+        cc_addresses = event_data.get('cc', []) or []
+        bcc_addresses = event_data.get('bcc', []) or []
+        attachments = event_data.get('attachments', []) or []
+        created_at = event_data.get('created_at') or payload.get('created_at')
 
-        ReceivedEmail.objects.create(
-            sender=sender,
-            subject=subject,
-            body=body
-        )
+        received_at = parse_datetime(created_at) if created_at else None
+        if received_at is None:
+            received_at = timezone.now()
+        elif timezone.is_naive(received_at):
+            received_at = timezone.make_aware(received_at, timezone=timezone.utc)
 
-        return JsonResponse({"success": True})
+        defaults = {
+            'sender': sender,
+            'message_id': message_id,
+            'subject': subject,
+            'body': body,
+            'recipients': to_addresses,
+            'cc': cc_addresses,
+            'bcc': bcc_addresses,
+            'attachments': attachments,
+            'received_at': received_at,
+        }
 
-    return JsonResponse({"error": "Invalid request"})
+        if email_id:
+            ReceivedEmail.objects.update_or_create(email_id=email_id, defaults=defaults)
+        else:
+            ReceivedEmail.objects.create(**defaults)
+
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'error': 'Invalid request'}, status=405)
 
 @login_required(login_url='login')
 def inbox(request):
@@ -422,4 +450,16 @@ def inbox(request):
 
     return render(request, 'accounts/inbox.html', {
         'emails': emails
+    })
+
+
+@login_required(login_url='login')
+def email_detail(request, email_id):
+    if request.user.role != 'admin':
+        messages.error(request, 'You do not have permission to access this page.')
+        return redirect('home')
+
+    email = get_object_or_404(ReceivedEmail, pk=email_id)
+    return render(request, 'accounts/email_detail.html', {
+        'email': email
     })

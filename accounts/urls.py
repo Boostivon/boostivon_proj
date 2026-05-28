@@ -23,6 +23,7 @@ urlpatterns = [
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     
     path('inbox/', views.inbox, name='inbox'),
+    path('inbox/<int:email_id>/', views.email_detail, name='email_detail'),
     path('webhooks/resend/', views.resend_webhook, name='resend_webhook'),
 
 ]

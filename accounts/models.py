@@ -103,10 +103,21 @@ class PasswordReset(models.Model):
     
 
 class ReceivedEmail(models.Model):
+    email_id = models.CharField(max_length=255, unique=True, blank=True, null=True)
+    message_id = models.CharField(max_length=255, blank=True, null=True)
     sender = models.EmailField()
-    subject = models.CharField(max_length=255)
-    body = models.TextField()
-    received_at = models.DateTimeField(auto_now_add=True)
+    recipients = models.JSONField(default=list, blank=True)
+    cc = models.JSONField(default=list, blank=True)
+    bcc = models.JSONField(default=list, blank=True)
+    subject = models.CharField(max_length=255, blank=True, default='(No subject)')
+    body = models.TextField(blank=True, default='')
+    attachments = models.JSONField(default=list, blank=True)
+    received_at = models.DateTimeField()
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-received_at', '-created_at']
 
     def __str__(self):
-        return self.subject
+        return self.subject or self.email_id or 'Received Email'
