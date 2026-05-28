@@ -470,3 +470,15 @@ def inbox(request):
     return render(request, 'accounts/inbox.html', {
         'emails': emails
     })
+    
+@login_required(login_url='login')
+def email_detail(request, email_id):
+    if request.user.role != 'admin':
+        messages.error(request, 'You do not have permission to access this page.')
+        return redirect('home')
+    
+    email = get_object_or_404(ReceivedEmail, id=email_id)
+
+    return render(request, 'accounts/email_detail.html', {
+        'email': email
+    })
