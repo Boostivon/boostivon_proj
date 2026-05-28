@@ -1,0 +1,142 @@
+{% extends "partials/base.html" %} {% load static %} {% block title %}Admin Analytics{% endblock title %}
+{% block content %}
+  <div class="page-header">
+    <h1>Admin Analytics</h1>
+    <p>Full platform overview of users, orders, products, and revenue.</p>
+  </div>
+
+  <div class="cards-grid cols-4" style="margin-top: 1rem;">
+    <div class="card pad">
+      <div class="stat-title">Total users</div>
+      <div class="stat-value">{{ user_count }}</div>
+      <div class="muted">Customers: {{ customer_count }} · Admins: {{ admin_count }}</div>
+    </div>
+    <div class="card pad">
+      <div class="stat-title">Total orders</div>
+      <div class="stat-value">{{ order_count }}</div>
+      <div class="muted">Completed: {{ completed_orders_count }} · Pending: {{ pending_orders_count }}</div>
+    </div>
+    <div class="card pad">
+      <div class="stat-title">Revenue</div>
+      <div class="stat-value">₦{{ total_revenue }}</div>
+      <div class="muted">Avg order: ₦{{ average_order_value }}</div>
+    </div>
+    <div class="card pad">
+      <div class="stat-title">Transactions</div>
+      <div class="stat-value">{{ transaction_count }}</div>
+      <div class="muted">Deposits: ₦{{ total_deposits }} · Withdrawals: ₦{{ total_withdrawals }}</div>
+    </div>
+  </div>
+
+  <div class="cards-grid cols-4" style="margin-top: 1rem; gap: 1rem;">
+    <div class="card pad">
+      <div class="stat-title">Active services</div>
+      <div class="stat-value">{{ active_services_count }}</div>
+    </div>
+    <div class="card pad">
+      <div class="stat-title">Platforms</div>
+      <div class="stat-value">{{ platform_count }}</div>
+    </div>
+    <div class="card pad">
+      <div class="stat-title">Social accounts</div>
+      <div class="stat-value">{{ total_accounts }}</div>
+    </div>
+    <div class="card pad">
+      <div class="stat-title">TTS requests</div>
+      <div class="stat-value">{{ tts_count }}</div>
+      <div class="muted">Pending: {{ pending_tts_count }}</div>
+    </div>
+  </div>
+
+  <div class="cards-grid cols-2" style="margin-top: 1rem; gap: 1rem;">
+    <div class="card pad">
+      <h3 style="margin-top: 0;">Top services by orders</h3>
+      {% if top_services %}
+        <div class="list" style="margin-top: 1rem;">
+          {% for service in top_services %}
+          <div class="list-item flex-between">
+            <span>{{ service.name }}</span>
+            <strong>{{ service.order_count }}</strong>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty" style="margin-top: 1rem;">No service data yet.</div>
+      {% endif %}
+    </div>
+
+    <div class="card pad">
+      <h3 style="margin-top: 0;">Top platforms by available accounts</h3>
+      {% if top_platforms %}
+        <div class="list" style="margin-top: 1rem;">
+          {% for platform in top_platforms %}
+          <div class="list-item flex-between">
+            <span>{{ platform.name }}</span>
+            <strong>{{ platform.account_count }}</strong>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty" style="margin-top: 1rem;">No platforms configured.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card pad" style="margin-top: 1rem;">
+    <div class="flex-between">
+      <div>
+        <h3>Recent orders</h3>
+        <p class="muted">Review the newest platform activity.</p>
+      </div>
+      <a href="{% url 'admin_users' %}" class="btn btn-outline">View users</a>
+    </div>
+
+    {% if latest_orders %}
+      <div class="table-wrap" style="margin-top: 1rem;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>User</th>
+              <th>Service</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in latest_orders %}
+            <tr>
+              <td>#{{ order.id }}</td>
+              <td>{{ order.user.username }}</td>
+              <td>{{ order.service.name }}</td>
+              <td>₦{{ order.total_price|floatformat:2 }}</td>
+              <td><span class="badge {% if order.status == 'completed' %}completed{% elif order.status == 'pending' %}pending{% else %}cancelled{% endif %}">{{ order.status|capfirst }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty" style="margin-top: 1rem;">No recent order activity found.</div>
+    {% endif %}
+  </div>
+
+  <div class="card pad" style="margin-top: 1rem;">
+    <h3 style="margin-top: 0;">Newest users</h3>
+    {% if newest_users %}
+      <div class="list" style="margin-top: 1rem;">
+        {% for new_user in newest_users %}
+        <div class="list-item flex-between">
+          <div>
+            <strong>{{ new_user.username }}</strong>
+            <div class="muted">{{ new_user.email }}</div>
+          </div>
+          <div class="muted">Joined {{ new_user.created_at|date:"M d" }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty" style="margin-top: 1rem;">No new users yet.</div>
+    {% endif %}
+  </div>
+{% endblock content %}

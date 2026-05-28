@@ -1,0 +1,160 @@
+{% extends "partials/base.html" %} {% load static %}
+{% block title %}
+Profile
+{% endblock title %}
+{% block content %}
+  <div class="page-header">
+    <h1>My Profile</h1>
+    <p>Manage your account details and see your latest activity.</p>
+  </div>
+
+  <div class="cards-grid cols-2" style="margin-top: 1rem;">
+    <div class="card pad">
+      <div class="flex-between">
+        <div>
+          <div class="stat-title">Account</div>
+          <h2 style="margin: 0.4rem 0 0;">{{ user.username }}</h2>
+          <div class="muted">{{ user.email }}</div>
+        </div>
+        <div class="avatar">{{ user.username|slice:":1"|upper }}</div>
+      </div>
+
+      <div class="list" style="margin-top: 1.2rem;">
+        <div class="list-item flex-between">
+          <span>Role</span>
+          <strong>{{ user.role|capfirst }}</strong>
+        </div>
+        <div class="list-item flex-between">
+          <span>Wallet balance</span>
+          <strong>₦{{ user.wallet_balance|floatformat:2 }}</strong>
+        </div>
+        <div class="list-item flex-between">
+          <span>Email verified</span>
+          <strong>{% if user.email_verified %}<span class="badge completed">Yes</span>{% else %}<span class="badge pending">No</span>{% endif %}</strong>
+        </div>
+        <div class="list-item flex-between">
+          <span>Joined</span>
+          <strong>{{ user.created_at|date:"M d, Y" }}</strong>
+        </div>
+      </div>
+
+      <div class="quick-actions" style="margin-top: 1rem;">
+        <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+        <a href="{% url 'change_password' %}" class="btn btn-outline">Change Password</a>
+      </div>
+    </div>
+
+    <div class="card pad">
+      <h3 style="margin-top: 0;">Account summary</h3>
+      <div class="cards-grid cols-2" style="margin-top: 1rem; gap: 0.75rem;">
+        <div class="card pad">
+          <div class="stat-title">Orders</div>
+          <div class="stat-value">{{ user_orders|length }}</div>
+        </div>
+        <div class="card pad">
+          <div class="stat-title">Completed</div>
+          <div class="stat-value">{{ completed_orders_count }}</div>
+        </div>
+        <div class="card pad">
+          <div class="stat-title">Pending</div>
+          <div class="stat-value">{{ pending_orders_count }}</div>
+        </div>
+        <div class="card pad">
+          <div class="stat-title">Spent</div>
+          <div class="stat-value">₦{{ total_spent }}</div>
+        </div>
+      </div>
+
+      <div class="list" style="margin-top: 1rem;">
+        <div class="list-item flex-between">
+          <span>Text-to-Speech jobs</span>
+          <strong>{{ tts_jobs_count }}</strong>
+        </div>
+        <div class="list-item flex-between">
+          <span>Recent orders</span>
+          <strong>{{ user_orders|length }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card pad" style="margin-top: 1rem;">
+    <div class="flex-between">
+      <div>
+        <h3>Latest orders</h3>
+        <p class="muted">Your six most recent orders.</p>
+      </div>
+      <a class="btn btn-outline" href="{% url 'store:orders' %}">View all orders</a>
+    </div>
+
+    {% if user_orders %}
+      <div class="table-wrap" style="margin-top: 1rem;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Service</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in user_orders %}
+            <tr>
+              <td>#{{ order.id }}</td>
+              <td>{{ order.service.name }}</td>
+              <td>₦{{ order.total_price|floatformat:2 }}</td>
+              <td>
+                <span class="badge {% if order.status == 'completed' %}completed{% elif order.status == 'pending' %}pending{% else %}cancelled{% endif %}">{{ order.status|capfirst }}</span>
+              </td>
+              <td>{{ order.created_at|date:"M d, Y" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty" style="margin-top: 1rem;">No recent orders yet. Start a boost now.</div>
+    {% endif %}
+  </div>
+
+  <div class="cards-grid cols-2" style="margin-top: 1rem; gap: 1rem;">
+    <div class="card pad">
+      <h3 style="margin-top: 0;">Recent TTS history</h3>
+      {% if recent_tts %}
+        <div class="list" style="margin-top: 1rem;">
+          {% for job in recent_tts %}
+            <div class="list-item flex-between">
+              <div>
+                <div>{{ job.text|truncatechars:60 }}</div>
+                <div class="muted" style="font-size: 0.82rem;">{{ job.language|upper }} · {{ job.voice }}</div>
+              </div>
+              <span class="badge {% if job.status == 'completed' %}completed{% elif job.status == 'pending' %}pending{% else %}cancelled{% endif %}">{{ job.status|capfirst }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty" style="margin-top: 1rem;">No TTS jobs yet.</div>
+      {% endif %}
+    </div>
+
+    <div class="card pad">
+      <h3 style="margin-top: 0;">More actions</h3>
+      <div class="list" style="margin-top: 1rem;">
+        <div class="list-item">
+          <strong>Verify email</strong>
+          <p class="muted" style="margin: 0.5rem 0 0;">Keep your account secure with email verification.</p>
+        </div>
+        <div class="list-item">
+          <strong>Manage wallet</strong>
+          <p class="muted" style="margin: 0.5rem 0 0;">Your available balance is ₦{{ user.wallet_balance|floatformat:2 }}.</p>
+        </div>
+        <div class="list-item">
+          <strong>Update credentials</strong>
+          <p class="muted" style="margin: 0.5rem 0 0;">Update username and email anytime.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

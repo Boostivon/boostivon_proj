@@ -1,0 +1,16 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Add Products{% endblock title %}
+{% block content %}
+          <div class="page-header">
+            <h1>Add Products</h1>
+            <p>Manage all products</p>
+          </div>
+          <div style="height: 12px"></div>
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn">Add Product</button>
+            <a href="{% url "store:add_platform" %}" class="btn">Add Platform</a>
+          </form>
+{% endblock content %}

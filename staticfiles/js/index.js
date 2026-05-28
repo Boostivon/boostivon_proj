@@ -113,5 +113,43 @@ $(document).ready(function() {
             });
         }
     });
+
+    // search users in admin users page using ajax
+
+    $('#user-search').on('input', function() {
+        const query = $(this).val();
+        $.ajax({
+            url: '/search-users/',
+            method: 'GET',
+            data: {
+                'q': query
+            },
+            success: function(response) {
+                const users = response.users;
+                const tbody = $('#users-table-body');
+                tbody.empty();
+                if (users.length > 0) {
+                    users.forEach(user => {
+                        const row = `<tr>
+                            <td>${user.username}</td>
+                            <td>${user.email}</td>
+                            <td class="text-right">₦${parseFloat(user.wallet_balance).toFixed(2)}</td>
+                            <td class="text-right">${user.total_orders ?? 0}</td>
+                            <td><span class="badge active">${user.role}</span></td>
+                        </tr>`;
+                        tbody.append(row);
+                    });
+                } else {
+                    tbody.append('<tr><td colspan="5" class="text-center">No users found</td></tr>');
+                }
+            },
+            error: function(xhr) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Failed to search users'
+                });
+            }
+        });
+    });
     
 });

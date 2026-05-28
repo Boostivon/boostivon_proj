@@ -5,6 +5,8 @@ import secrets
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+from store.models import Order
+
 # Create your models here.
 class User(AbstractUser):
     email = models.EmailField(unique=True)
@@ -22,6 +24,8 @@ class User(AbstractUser):
     def __str__(self):
         return self.email
     
+    def orders_count(self):
+        return Order.objects.filter(user=self).count()
 
 class EmailVerification(models.Model):
     """Model to store email verification codes and track verification status."""

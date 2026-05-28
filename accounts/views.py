@@ -4,12 +4,15 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from accounts.models import EmailVerification, PasswordReset
-from store.models import Order, TextToSpeechRequest 
+from store.models import Order, Platform, SocialMediaAccount, TextToSpeechRequest, Service, Transaction
 from store.views import orders
 from .utils import send_verification_code, send_password_reset_email
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.db.models import Count, Q, Sum
+from decimal import Decimal
 
+USE_SUPABASE = getattr(settings, 'USE_SUPABASE', False)
 from .forms import UserRegisterForm
 
 User = get_user_model()
@@ -27,10 +30,13 @@ def home(request):
     completed_orders_count = orders.filter(status='completed').count() if orders else 0
     tts_jobs_count = TextToSpeechRequest.objects.filter(user=request.user).count() if request.user.is_authenticated else 0
     
+    products = Platform.objects.all().order_by('-created_at')[:10] # Get the first 10 products for display
+    
     context = {
         'orders': orders,
         'completed_orders_count': completed_orders_count,
-        'tts_jobs_count': tts_jobs_count
+        'tts_jobs_count': tts_jobs_count,
+        'products': products,
     }
     
     return render(request, 'accounts/dashboard.html', context)
@@ -57,7 +63,8 @@ def register(request):
             messages.success(request, 'Registration and login successful!')
             return redirect('home')
         else:
-            errors = form.errors.as_json()
+            errors = next(iter(form.errors.values()))[0]
+            print(errors)  # Log errors for debugging
             messages.error(request, errors)
             return redirect('register')
         
@@ -65,6 +72,7 @@ def register(request):
     return render(request, 'accounts/register.html', context)
 
 def login_view(request):
+    print(USE_SUPABASE)
     if request.user.is_authenticated:
         messages.info(request, 'You are already logged in.')
         return redirect('home')
@@ -96,7 +104,6 @@ def logout_view(request):
     auth_logout(request)
     messages.success(request, 'You have been logged out.')
     return redirect('home')
-
 
 
 def send_verification(request):
@@ -235,3 +242,147 @@ def reset_password(request):
             return redirect('reset_password')
     
     return render(request, 'accounts/reset_password.html')
+
+
+# ============================ Admin views ============================
+@login_required(login_url='login')
+def admin_dashboard(request):
+    if request.user.role != 'admin':
+        messages.error(request, 'You do not have permission to access the admin dashboard.')
+        return redirect('home')
+
+    users = User.objects.all()
+    user_count = users.count()
+    customer_count = users.filter(role='customer').count()
+    admin_count = users.filter(role='admin').count()
+
+    orders = Order.objects.all()
+    order_count = orders.count()
+    completed_orders_count = orders.filter(status='completed').count()
+    pending_orders_count = orders.filter(status='pending').count()
+    cancelled_orders_count = orders.filter(status='cancelled').count()
+    total_revenue = orders.filter(status='completed').aggregate(total=Sum('total_price'))['total'] or Decimal('0')
+    average_order_value = total_revenue / completed_orders_count if completed_orders_count else Decimal('0')
+
+    platforms = Platform.objects.all()
+    platform_count = platforms.count()
+    total_accounts = SocialMediaAccount.objects.count()
+    active_services_count = Service.objects.filter(is_active=True).count()
+    tts_count = TextToSpeechRequest.objects.count()
+    pending_tts_count = TextToSpeechRequest.objects.filter(status='pending').count()
+    transaction_count = Transaction.objects.count()
+    total_deposits = Transaction.objects.filter(transaction_type='deposit', status='completed').aggregate(total=Sum('amount'))['total'] or Decimal('0')
+    total_withdrawals = Transaction.objects.filter(transaction_type='withdrawal', status='completed').aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
+    top_services = Service.objects.annotate(order_count=Count('order')).order_by('-order_count')[:5]
+    top_platforms = platforms.annotate(account_count=Count('socialmediaaccount')).order_by('-account_count')[:5]
+    latest_orders = orders.order_by('-created_at')[:6]
+    newest_users = users.order_by('-created_at')[:5]
+
+    context = {
+        'user_count': user_count,
+        'customer_count': customer_count,
+        'admin_count': admin_count,
+        'order_count': order_count,
+        'completed_orders_count': completed_orders_count,
+        'pending_orders_count': pending_orders_count,
+        'cancelled_orders_count': cancelled_orders_count,
+        'total_revenue': f"{total_revenue:,.2f}",
+        'average_order_value': f"{average_order_value:,.2f}" if average_order_value else '0.00',
+        'platform_count': platform_count,
+        'total_accounts': total_accounts,
+        'active_services_count': active_services_count,
+        'tts_count': tts_count,
+        'pending_tts_count': pending_tts_count,
+        'transaction_count': transaction_count,
+        'total_deposits': f"{total_deposits:,.2f}",
+        'total_withdrawals': f"{total_withdrawals:,.2f}",
+        'top_services': top_services,
+        'top_platforms': top_platforms,
+        'latest_orders': latest_orders,
+        'newest_users': newest_users,
+    }
+
+    return render(request, 'accounts/admin.html', context)
+
+@login_required(login_url='login')
+def admin_users(request):
+    if request.user.role != 'admin':
+        messages.error(request, 'You do not have permission to access this page.')
+        return redirect('home')
+    
+    users = User.objects.annotate(
+        total_orders=Count('orders')
+    ).order_by('-created_at')
+
+    
+    user_count = users.count()
+    
+    context = {
+        'users': users,
+        'user_count': user_count,
+    }
+    
+    return render(request, 'accounts/admin-users.html', context)
+
+@login_required(login_url='login')
+def search_users(request):
+    if request.user.role != 'admin':
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    query = request.GET.get('q', '')
+    users = User.objects.filter(username__icontains=query) | User.objects.filter(email__icontains=query)
+
+    user_data = [
+        {
+            'username': user.username,
+            'email': user.email,
+            'wallet_balance': str(user.wallet_balance),
+            'role': user.role,
+            'total_orders': Order.objects.filter(user=user).count(),
+        }
+        for user in users
+    ]
+
+    return JsonResponse({'users': user_data})
+
+@login_required(login_url='login')
+def profile(request):
+    user = request.user
+    user_orders = user.orders.order_by('-created_at')[:6]
+    completed_orders_count = user.orders.filter(status='completed').count()
+    pending_orders_count = user.orders.filter(status='pending').count()
+    cancelled_orders_count = user.orders.filter(status='cancelled').count()
+    total_spent = user.orders.filter(status='completed').aggregate(total=Sum('total_price'))['total'] or Decimal('0')
+    tts_jobs_count = TextToSpeechRequest.objects.filter(user=user).count()
+    recent_tts = TextToSpeechRequest.objects.filter(user=user).order_by('-created_at')[:5]
+
+    context = {
+        'user': user,
+        'user_orders': user_orders,
+        'completed_orders_count': completed_orders_count,
+        'pending_orders_count': pending_orders_count,
+        'cancelled_orders_count': cancelled_orders_count,
+        'total_spent': f"{total_spent:,.2f}",
+        'tts_jobs_count': tts_jobs_count,
+        'recent_tts': recent_tts,
+    }
+    return render(request, 'accounts/profile.html', context)
+
+@login_required(login_url='login')
+def edit_profile(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        
+        if username:
+            request.user.username = username
+        if email and email != request.user.email:
+            request.user.email = email
+            request.user.email_verified = False  # Mark email as unverified until re-verified
+        
+        request.user.save()
+        messages.success(request, 'Profile updated successfully.')
+        return redirect('profile')
+    
+    return render(request, 'accounts/edit_profile.html', {'user': request.user})

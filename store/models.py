@@ -2,8 +2,10 @@ from decimal import Decimal
 
 from django.db import models
 from django.contrib.auth import get_user_model
+import uuid
+import random
+import string
 
-User = get_user_model()
 
 # Create your models here.
 PLATFORM_CHOICES = (
@@ -27,6 +29,7 @@ TRANSACTION_TYPE_CHOICES = (
     ('deposit', 'Deposit'),
     ('withdrawal', 'Withdrawal'),
 )
+
 class Service(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -46,12 +49,14 @@ class Service(models.Model):
     def price(self):
         return (self.price_per_k or Decimal('0.00')) / Decimal('1000')
     
+    def order_count(self):
+        return Order.objects.filter(service=self)
 
 class Order(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='orders')
     quantity = models.IntegerField()
-    target_link = models.URLField()
+    target_link = models.URLField(max_length=1000)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     provider_order_id = models.CharField(max_length=255, blank=True, null=True)
@@ -73,8 +78,11 @@ class Order(models.Model):
     def count_completed_orders(self):
         return Order.objects.filter(user=self.user, status='completed').count()
     
+    def orders_count(self):
+        return Order.objects.filter(user=self.user).count() 
+   
 class TextToSpeechRequest(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
     text = models.TextField()
     language = models.CharField(max_length=50, default='en')
     voice = models.CharField(max_length=50, default='default')
@@ -87,13 +95,31 @@ class TextToSpeechRequest(models.Model):
         return f"TTS Request #{self.id} for {self.user.email}"
     
 # model for social media accounts
-class SocialMediaAccount(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    platform = models.CharField(max_length=50, choices=PLATFORM_CHOICES)
-    username = models.CharField(max_length=255)
-    access_pswd = models.TextField()
+class Platform(models.Model):
+    name = models.CharField(max_length=50, unique=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     description = models.TextField(blank=True)
+    quantity = models.IntegerField(default=0)  # New field to track quantity of accounts available
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.name
+    
+    def accounts_count(self):
+        return SocialMediaAccount.objects.filter(platform=self).count()
+    
+    # calculate quantity  of platform based on number of social media accounts available for that platform
+    def save(self, *args, **kwargs):
+        self.quantity = self.accounts_count()
+        super().save(*args, **kwargs)
+        
+    
+class SocialMediaAccount(models.Model):
+    platform = models.ForeignKey(Platform, on_delete=models.CASCADE)
+    username = models.CharField(max_length=255)
+    access_pswd = models.TextField()
+    link = models.URLField(max_length=1000, blank=True, null=True)
+    is_assigned = models.BooleanField(default=False)  # New field to track if the account is assigned to a user
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -101,7 +127,7 @@ class SocialMediaAccount(models.Model):
         return f"{self.platform}: {self.username}"
     
 class Transaction(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPE_CHOICES)  # e.g., 'deposit', 'withdrawal'
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
@@ -114,7 +140,7 @@ class Transaction(models.Model):
 
 class Payment(models.Model):
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
 
     order = models.ForeignKey(
         Order,
@@ -160,3 +186,37 @@ class Payment(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    
+class AccountOrder(models.Model):
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='account_orders')
+    order_id = models.CharField(max_length=255, unique=True)
+    platform = models.ForeignKey(Platform, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Account Order #{self.id} - {self.platform.name} x {self.quantity} for {self.user.email}"
+    
+    def save(self, *args, **kwargs):
+        # On save, update the total price based on the platform price and quantity
+        self.total_price = self.platform.price * self.quantity
+        if not self.order_id:
+            # generate a unique order ID using uuid4 and a random string
+            self.order_id = str(uuid.uuid4())
+        super().save(*args, **kwargs)
+
+class UserPlatformAccount(models.Model):
+    """Tracks which social media accounts are assigned to which users"""
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='platform_accounts')
+    account = models.OneToOneField(SocialMediaAccount, on_delete=models.CASCADE)
+    account_order = models.ForeignKey(AccountOrder, on_delete=models.SET_NULL, null=True, blank=True, related_name='user_accounts')
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.account}"
+    
+    class Meta:
+        unique_together = ('user', 'account')

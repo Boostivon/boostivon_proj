@@ -34,10 +34,10 @@ Dashboard
       {% endif %}
     </div>
   </div>
-  <div class="card pad">
+  {% comment %} <div class="card pad">
     <div class="stat-title">TTS Jobs</div>
     <div class="stat-value">32</div>
-  </div>
+  </div> {% endcomment %}
 </div>
 <div style="height: 12px"></div>
 <div class="quick-actions">
@@ -53,40 +53,42 @@ Dashboard
     href="./wallet-deposit.html"
     >Add Funds</a
   >
-  <a
+  {% comment %} <a
     class="btn btn-outline"
     style="text-decoration: none"
     href="./tts.html"
     >Generate TTS</a
-  >
+  > {% endcomment %}
 </div>
 <div style="height: 12px"></div>
-<div class="cards-grid cols-2">
-  <div class="card pad">
-    <h3 style="margin-top: 0">Order Status</h3>
-    <div class="list">
-      <div class="list-item flex-between">
-        <span>Pending</span><strong>4</strong>
-      </div>
-      <div class="list-item flex-between">
-        <span>Processing</span><strong>2</strong>
-      </div>
-      <div class="list-item flex-between">
-        <span>Completed</span><strong>48</strong>
-      </div>
-      <div class="list-item flex-between">
-        <span>Cancelled</span><strong>2</strong>
-      </div>
-    </div>
-  </div>
-  <div class="card pad">
-    <h3 style="margin-top: 0">Recent Activity</h3>
-    <div class="list">
-      <div class="list-item">Order #1250 placed 2 hours ago</div>
-      <div class="list-item">Deposit of $100 completed yesterday</div>
-      <div class="list-item">TTS job generated 3 minutes ago</div>
-      <div class="list-item">Order #1241 completed 1 day ago</div>
-    </div>
-  </div>
+{% comment %} display recent products {% endcomment %}
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Platform</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th class="text-right">Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in products %}
+        <tr>
+          <td>{{ product.name|title }}</td>
+          <td>
+            {{ product.quantity }}Pcs
+          </td>
+          <td class="text-right">₦{{ product.price|floatformat:2 }} Each</td>
+          <td class="text-right">{{ product.created_at|date:"M d, Y" }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="4" class="text-center">No products found.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% comment %} <a href="{% url "stor" %}"></a> {% endcomment %}
 </div>
 {% endblock content %}

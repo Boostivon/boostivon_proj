@@ -80,9 +80,15 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
+  width: 100%;
+  overflow-x: hidden;
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: var(--background);
   color: var(--foreground);
+}
+
+body {
+  min-width: 0;
 }
 
 a {
@@ -107,6 +113,25 @@ a {
 
 .text-right {
   text-align: right;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+  vertical-align: middle;
+}
+.actions .btn {
+  flex: none;
+  display: inline-flex;
+}
+
+/* small button modifier used in tables/actions */
+.btn-sm {
+  padding: 0.28rem 0.45rem;
+  font-size: 0.82rem;
+  border-radius: 8px;
 }
 
 .text-center {
@@ -146,10 +171,10 @@ a {
 }
 
 .logo-badge {
-  width: 40px;
-  height: 40px;
+  width: 70px;
+  height: 70px;
   border-radius: 10px;
-  background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
+  /* background: linear-gradient(90deg, var(--accent-start), var(--accent-end)); */
   color: var(--white);
   display: grid;
   place-items: center;
@@ -325,6 +350,14 @@ a {
   margin: 0;
   font-size: 0.82rem;
 }
+.logo-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.brand img {
+  width: 80px;
+}
 
 .brand strong {
   font-size: 1rem;
@@ -452,6 +485,29 @@ a {
 
 .content {
   padding: 1rem;
+  overflow-x: hidden;
+  min-width: 0;
+}
+
+.panel-shell,
+.main-area,
+.card,
+.cards-grid,
+.table-wrap,
+.split,
+.kpi-strip {
+  min-width: 0;
+}
+
+.table {
+  width: 100%;
+  min-width: 0;
+}
+
+.table th,
+.table td {
+  white-space: normal;
+  word-break: break-word;
 }
 
 .page-header h1 {
@@ -711,7 +767,29 @@ a {
 .switch.on .knob {
   transform: translateX(18px);
 }
+.purchase-div{
+  margin-top: 40px;
+  width: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
 
+.input-div{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.purchase-btn{
+  width: 300px;
+}
+.plus, .minus{
+  background-color: #051edb;
+  color: #fff;
+  margin: 0 10px;
+}
 @media (max-width: 1080px) {
   .cards-grid.cols-4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -742,6 +820,20 @@ a {
   .split,
   .kpi-strip {
     grid-template-columns: 1fr;
+  }
+
+  .table {
+    min-width: 100%;
+  }
+
+  .purchase-div {
+    width: 100%;
+    max-width: 350px;
+  }
+
+  .purchase-btn {
+    width: 100%;
+    max-width: 300px;
   }
 }
 

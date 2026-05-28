@@ -1,0 +1,33 @@
+{% extends "partials/base.html" %} {% load static %} {% block title %}Admin Users{% endblock title %}
+{% block content %}
+          <div class="page-header">
+            <h1>Admin Users</h1>
+            <p>Manage all users</p>
+          </div>
+          <div style="height: 12px"></div>
+          <input type="text" id="user-search" class="input" placeholder="Search users..." onkeyup="filterTable()">
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th class="text-right">Balance</th>
+                  <th class="text-right">Orders</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                {% for user in users %}
+                  <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td class="text-right">₦{{ user.wallet_balance|floatformat:2|default:"0.00" }}</td>
+                    <td class="text-right">{{ user.total_orders|default:"0" }}</td>
+                    <td><span class="badge active">{{ user.role }}</span></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+{% endblock content %}

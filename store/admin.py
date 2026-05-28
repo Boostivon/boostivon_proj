@@ -8,8 +8,8 @@ class ServiceAdmin(admin.ModelAdmin):
     list_filter = ('created_at',)
     
 class SocialMediaAccountAdmin(admin.ModelAdmin):
-    list_display = ('user', 'platform', 'username', 'price', 'created_at')
-    search_fields = ('user__email', 'platform', 'username')
+    list_display = ('platform', 'username', 'created_at')
+    search_fields = ('platform', 'username')
     list_filter = ('platform', 'created_at')
     
 class OrderAdmin(admin.ModelAdmin):
@@ -26,6 +26,11 @@ class TransactionAdmin(admin.ModelAdmin):
     list_display = ('user', 'amount', 'transaction_type', 'reference', 'created_at')
     search_fields = ('user__email', 'reference')
     list_filter = ('transaction_type', 'created_at')
+    
+# class PlatformAdmin(admin.ModelAdmin):
+#     list_display = ('name', 'price', 'description', 'created_at')
+#     search_fields = ('name',)
+#     list_filter = ('created_at',)
     
 admin.site.register(Service, ServiceAdmin)
 admin.site.register(SocialMediaAccount, SocialMediaAccountAdmin)

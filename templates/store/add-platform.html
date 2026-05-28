@@ -1,0 +1,13 @@
+{% extends "partials/base.html" %}{% load static %}
+{% block title %}Add Platform{% endblock title %}
+{% block content %}
+  <div class="page-header">
+    <h1>Add Platform</h1>
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn">Add Platform</button>
+    {% comment %} <a href="{% url "store:platform_list" %}">Cancel</a> {% endcomment %}
+  </form>
+{% endblock content %}

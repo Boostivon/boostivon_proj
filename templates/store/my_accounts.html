@@ -1,0 +1,133 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}My Accounts{% endblock title %}
+{% block content %}
+
+<div class="page-header">
+  <h1>My Social Media Accounts</h1>
+  <p>View and manage accounts you've purchased</p>
+</div>
+
+<div style="height: 20px;"></div>
+
+{% if user_accounts %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Platform</th>
+          <th>Username</th>
+          <th>Password</th>
+          <th>Link</th>
+          <th class="text-right">Assigned Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user_account in user_accounts %}
+          <tr>
+            <td>{{ user_account.account.platform.name|title }}</td>
+            <td>{{ user_account.account.username }}</td>
+            <td>
+              <details>
+                <summary>Show</summary>
+                <code>{{ user_account.account.access_pswd }}</code>
+              </details>
+            </td>
+            <td>
+              {% if user_account.account.link %}
+                <a href="{{ user_account.account.link }}" target="_blank" class="btn btn-sm btn-link">Visit</a>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td class="text-right">{{ user_account.assigned_at|date:'M d, Y' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="card pad" style="text-align: center;">
+    <p>You haven't purchased any accounts yet.</p>
+    <a href="{% url 'store:platform_list' %}" class="btn btn-primary">Browse Platforms</a>
+  </div>
+{% endif %}
+
+<div style="height: 40px;"></div>
+
+{% if account_orders %}
+  <h2>Purchase History</h2>
+  <div style="height: 12px;"></div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Platform</th>
+          <th>Quantity</th>
+          <th class="text-right">Total Price</th>
+          <th>Status</th>
+          <th class="text-right">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in account_orders %}
+          <tr>
+            <td><code>{{ order.order_id }}</code></td>
+            <td>{{ order.platform.name|title }}</td>
+            <td>{{ order.quantity }}</td>
+            <td class="text-right">₦{{ order.total_price|floatformat:2 }}</td>
+            <td>
+              <span class="badge badge-success">{{ order.status|title }}</span>
+            </td>
+            <td class="text-right">{{ order.created_at|date:'M d, Y H:i' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+
+<style>
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  
+  .badge-success {
+    background: var(--success);
+    color: white;
+  }
+  
+  code {
+    background: var(--muted);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9rem;
+  }
+  
+  details {
+    cursor: pointer;
+  }
+  
+  details summary {
+    user-select: none;
+  }
+  
+  .btn-link {
+    color: var(--accent-start);
+    text-decoration: none;
+    padding: 0;
+    font-weight: 600;
+  }
+  
+  .btn-link:hover {
+    text-decoration: underline;
+  }
+</style>
+
+{% endblock content %}

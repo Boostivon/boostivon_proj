@@ -1,0 +1,43 @@
+{% extends "partials/base.html" %} {% load static %}
+{% block title %}Edit Profile{% endblock title %}
+{% block content %}
+  <div class="page-header">
+    <h1>Edit Profile</h1>
+    <p>Update your account details and keep your profile secure.</p>
+  </div>
+
+  <div class="card pad" style="margin-top: 1rem; max-width: 720px;">
+    <form method="post">
+      {% csrf_token %}
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="username" class="input" type="text" value="{{ user.username }}" required />
+      </div>
+
+      <div class="field">
+        <label for="email">Email address</label>
+        <input id="email" name="email" class="input" type="email" value="{{ user.email }}" required />
+      </div>
+
+      <div class="field">
+        <label>Account status</label>
+        <div class="chip-row" style="gap: 0.5rem;">
+          <span class="chip">Role: {{ user.role|capfirst }}</span>
+          <span class="chip">Email verified: {% if user.email_verified %}Yes{% else %}No{% endif %}</span>
+          <span class="chip">Joined: {{ user.created_at|date:"M d, Y" }}</span>
+        </div>
+      </div>
+
+      <div class="quick-actions" style="margin-top: 1rem;">
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        <a href="{% url 'profile' %}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+
+    <div class="card pad" style="margin-top: 1rem; background: color-mix(in srgb, var(--muted) 70%, transparent);">
+      <h3 style="margin-top: 0;">Security</h3>
+      <p class="muted">Change your password to keep your account secure.</p>
+      <a class="btn btn-outline" href="{% url 'change_password' %}">Change Password</a>
+    </div>
+  </div>
+{% endblock content %}

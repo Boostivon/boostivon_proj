@@ -14,4 +14,11 @@ urlpatterns = [
     path('edit-password/', views.change_password, name='change_password'),
     path('password-reset/', views.reset_password, name='reset_password'),
     path('password-reset/<str:reset_token>/', views.confirm_password_reset, name='password_reset_confirm'),
+    
+    path('dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('users/', views.admin_users, name='admin_users'),
+    path('search-users/', views.search_users, name='search_users'),
+    
+    path('profile/', views.profile, name='profile'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
 ]

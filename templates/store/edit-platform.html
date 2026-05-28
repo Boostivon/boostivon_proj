@@ -1,0 +1,16 @@
+{% extends "partials/base.html" %} {% load static %}
+{% block title %}
+Edit Platform
+{% endblock title %}
+{% block content %}
+<div class="page-header">
+<h1>Edit Platform</h1>
+<p>Manage your platforms</p>
+</div>
+<div style="height: 12px"></div>
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+{{ form.as_p }}
+<button type="submit" class="btn">Save Changes</button>
+</form>
+{% endblock content %}
