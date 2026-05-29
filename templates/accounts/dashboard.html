@@ -69,7 +69,7 @@ Dashboard
         <th>Platform</th>
         <th>Quantity</th>
         <th>Price</th>
-        <th class="text-right">Created</th>
+        
       </tr>
     </thead>
     <tbody>
@@ -80,7 +80,7 @@ Dashboard
             {{ product.quantity }}Pcs
           </td>
           <td class="text-right">₦{{ product.price|floatformat:2 }} Each</td>
-          <td class="text-right">{{ product.created_at|date:"M d, Y" }}</td>
+          
         </tr>
       {% empty %}
         <tr>
