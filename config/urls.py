@@ -25,7 +25,7 @@ handler404 = 'accounts.views.custom_404_view'
 handler500 = 'accounts.views.custom_500_view'
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('restricted-admin/', admin.site.urls),
     path('', include('accounts.urls')),
     path('store/', include('store.urls')),
 ]
