@@ -8,14 +8,21 @@ class ServiceAdmin(admin.ModelAdmin):
     list_filter = ('created_at',)
     
 class SocialMediaAccountAdmin(admin.ModelAdmin):
-    list_display = ('platform', 'username', 'created_at')
-    search_fields = ('platform', 'username')
-    list_filter = ('platform', 'created_at')
+    list_display = ('platform', 'link', 'is_assigned', 'created_at')
+    search_fields = ('platform__name', 'link', 'logs')
+    list_filter = ('platform', 'is_assigned', 'created_at')
     
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('service', 'user', 'quantity', 'total_price', 'created_at')
-    search_fields = ('service__name', 'user__email')
-    list_filter = ('created_at',)
+    list_display = ('service', 'user', 'quantity', 'total_price', 'provider_status', 'created_at')
+    search_fields = ('service__name', 'user__email', 'provider_order_id')
+    list_filter = ('provider_status', 'created_at')
+    actions = ['mark_provider_resolved']
+
+    def mark_provider_resolved(self, request, queryset):
+        """Admin action to mark selected orders' provider_status as completed."""
+        updated = queryset.update(provider_status='completed')
+        self.message_user(request, f"Marked {updated} order(s) as provider-resolved.")
+    mark_provider_resolved.short_description = 'Mark selected orders as provider-resolved'
     
 class TextToSpeechRequestAdmin(admin.ModelAdmin):
     list_display = ('user', 'language', 'voice', 'status', 'created_at')

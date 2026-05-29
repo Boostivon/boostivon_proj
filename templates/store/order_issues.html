@@ -1,0 +1,103 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Order Issues{% endblock title %}
+{% block content %}
+  <div class="page-header">
+    <h1>Order Issues</h1>
+    <p>All orders that encountered problems with provider processing.</p>
+  </div>
+
+  <div style="height:12px"></div>
+
+  <!-- Filter Form -->
+  <div class="card pad" style="margin-bottom: 1rem;">
+    <form method="get" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end;">
+      <div style="flex: 1; min-width: 200px;">
+        <label for="order_id" style="display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.25rem;">Order ID</label>
+        <input type="number" id="order_id" name="order_id" class="input" placeholder="Filter by order ID" value="{{ filter_order_id }}" style="width: 100%;">
+      </div>
+      <div style="flex: 1; min-width: 200px;">
+        <label for="status" style="display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.25rem;">Provider Status</label>
+        <select id="status" name="status" class="input" style="width: 100%;">
+          <option value="">All Statuses</option>
+          {% for s in all_statuses %}
+            <option value="{{ s }}" {% if filter_status == s %}selected{% endif %}>{{ s|title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Filter</button>
+      <a href="{% url 'store:order_issues' %}" class="btn btn-outline">Clear</a>
+    </form>
+  </div>
+
+  {% if issues %}
+    <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Found {{ page_obj.paginator.count }} issue(s) — Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>User</th>
+            <th>Service</th>
+            <th>Qty</th>
+            <th>Total</th>
+            <th>Provider ID</th>
+            <th>Provider Status</th>
+            <th>Provider Response</th>
+            <th class="text-right">Created</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in issues %}
+            <tr>
+              <td><a href="{% url 'store:order_issue_detail' order.id %}">#{{ order.id }}</a></td>
+              <td>{{ order.user.email }}</td>
+              <td>{{ order.service.name }}</td>
+              <td>{{ order.quantity }}</td>
+              <td>₦{{ order.total_price|floatformat:2 }}</td>
+              <td>{{ order.provider_order_id|default:'—' }}</td>
+              <td>{{ order.provider_status|title }}</td>
+              <td>
+                <details>
+                  <summary>View</summary>
+                  <pre style="max-height:200px; overflow:auto;">{{ order.provider_response|default:'{}' }}</pre>
+                </details>
+              </td>
+              <td class="text-right">{{ order.created_at|date:'M d, Y H:i' }}</td>
+              <td>
+                <a class="btn btn-sm" href="{% url 'store:order_issue_detail' order.id %}">Open</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+      <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+        {% if page_obj.has_previous %}
+          <a href="?page=1{% if filter_order_id %}&order_id={{ filter_order_id }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}" class="btn btn-outline">First</a>
+          <a href="?page={{ page_obj.previous_page_number }}{% if filter_order_id %}&order_id={{ filter_order_id }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}" class="btn btn-outline">Previous</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <span class="btn btn-primary" style="pointer-events: none;">{{ num }}</span>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}{% if filter_order_id %}&order_id={{ filter_order_id }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}" class="btn btn-outline">{{ num }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}{% if filter_order_id %}&order_id={{ filter_order_id }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}" class="btn btn-outline">Next</a>
+          <a href="?page={{ page_obj.paginator.num_pages }}{% if filter_order_id %}&order_id={{ filter_order_id }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}" class="btn btn-outline">Last</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="card pad">No order issues found.</div>
+  {% endif %}
+
+{% endblock content %}

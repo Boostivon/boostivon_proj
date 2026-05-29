@@ -324,7 +324,8 @@ a {
 .panel-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 1fr;
+  margin-left: 260px;
   background: var(--background);
 }
 
@@ -332,10 +333,13 @@ a {
   border-right: 1px solid var(--border);
   background: color-mix(in srgb, var(--muted) 50%, transparent);
   padding: 1rem 0.85rem;
-  position: sticky;
+  position: fixed;
   top: 0;
-  max-height: 100vh;
+  left: 0;
+  width: 260px;
+  height: 100vh;
   overflow: auto;
+  z-index: 999;
 }
 
 .brand {
@@ -804,6 +808,7 @@ a {
 @media (max-width: 860px) {
   .panel-shell {
     grid-template-columns: 1fr;
+    margin-left: 0;
   }
 
   .sidebar {

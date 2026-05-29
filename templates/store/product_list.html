@@ -14,8 +14,8 @@
             <div style="min-width: 0; flex: 1;">
               <div class="muted" style="font-size:0.82rem;">Platform</div>
               <h3 style="margin: 0.25rem 0;">{{ product.platform.name }}</h3>
-              <div class="muted">@{{ product.username }}</div>
-              <p class="muted" style="margin-top: 0.6rem; font-size: 0.92rem;">{{ product.description|default:"No description" }}</p>
+              <div class="muted">{{ product.logs|default:"No account notes"|truncatechars:40 }}</div>
+              <p class="muted" style="margin-top: 0.6rem; font-size: 0.92rem;">{{ product.platform.description|default:"No description" }}</p>
             </div>
             <div style="text-align: right;">
               <div class="stat-title">Price</div>

@@ -6,6 +6,7 @@ import requests
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import CreateOrderForm, PlatformForm, SocialMediaAccountForm
 from .models import Platform, Service, Order, SocialMediaAccount, AccountOrder, UserPlatformAccount
 from django.http import HttpResponse, JsonResponse
@@ -140,9 +141,7 @@ def admin_add_products(request):
     if request.method == 'POST':
         form = SocialMediaAccountForm(request.POST)
         if form.is_valid():
-            form_user = form.save(commit=False)
-            form_user.user = request.user
-            form_user.save()
+            form.save()
 
             messages.success(request, 'Product added successfully.')
             return redirect('store:platform_list')
@@ -152,6 +151,48 @@ def admin_add_products(request):
             return redirect('store:add_products')
         
     return render(request, 'store/add-products.html', {'form': form})
+
+
+@login_required(login_url='login')
+def admin_order_issues(request):
+    """Admin view to list all orders in the database."""
+    if request.user.role != 'admin':
+        return redirect('home')
+
+    # Start with all orders, optimized with select_related
+    issues = Order.objects.select_related('user', 'service').order_by('-created_at')
+
+    # Apply filters
+    order_id = request.GET.get('order_id', '').strip()
+    status = request.GET.get('status', '').strip()
+
+    if order_id:
+        try:
+            issues = issues.filter(id=int(order_id))
+        except (ValueError, TypeError):
+            pass
+
+    if status:
+        issues = issues.filter(provider_status=status)
+
+    # Pagination: 50 items per page
+    paginator = Paginator(issues, 50)
+    page_num = request.GET.get('page', 1)
+    try:
+        page_obj = paginator.page(page_num)
+    except (PageNotAnInteger, EmptyPage):
+        page_obj = paginator.page(1)
+
+    # Get all unique statuses for filter dropdown
+    all_statuses = Order.objects.values_list('provider_status', flat=True).distinct()
+
+    return render(request, 'store/order_issues.html', {
+        'page_obj': page_obj,
+        'issues': page_obj.object_list,
+        'all_statuses': all_statuses,
+        'filter_order_id': order_id,
+        'filter_status': status,
+    })
 
 @login_required(login_url='login')
 def add_platform(request):
@@ -302,3 +343,20 @@ def initialize_product_purchase(request, order_id):
         messages.error(request, 'Insufficient wallet balance. Please fund your wallet to complete the purchase.')
         return redirect('fund_wallet')
     
+@login_required(login_url='login')
+def admin_order_detail(request, order_id):
+    if request.user.role != 'admin':
+        messages.error(request, 'You do not have permission to view this page.')
+        return redirect('home')
+    
+    if not order_id:
+        messages.error(request, 'Order ID is required.')
+        return redirect('home')
+
+    try:
+        order = Order.objects.get(id=order_id)
+    except Order.DoesNotExist:
+        messages.error(request, 'Order not found.')
+        return redirect('home')
+
+    return render(request, 'store/admin_order_detail.html', {'order': order})

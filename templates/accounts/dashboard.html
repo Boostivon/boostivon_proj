@@ -80,7 +80,11 @@ Dashboard
             {{ product.quantity }}Pcs
           </td>
           <td class="text-right">₦{{ product.price|floatformat:2 }} Each</td>
-          
+          <td>
+            <a class="btn btn-sm" href="{% url 'store:view_platform' product.id %}">
+              <i class="bi bi-eye"></i>
+            </a>
+          </td>
         </tr>
       {% empty %}
         <tr>

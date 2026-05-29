@@ -48,21 +48,21 @@
         <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url "home" %}">Dashboard</a>
         {% comment %} <a class="nav-link {% if 'service' in request.path %}active{% endif %}" href="{% url "store:service_list" %}">Services</a> {% endcomment %}
         <a class="nav-link" href="{% url "store:create_order" %}">Boost Social Media</a>
-        <a class="nav-link {% if 'order' in request.path %}active{% endif %}" href="{% url "store:orders" %}">Orders</a>
-        <a class="nav-link" href="{% url "fund_wallet" %}">Fund Wallet</a>
+        <a class="nav-link {% if 'orders' in request.path %}active{% endif %}" href="{% url "store:orders" %}">Orders</a>
+        <a class="nav-link {% if 'fund-wallet' in request.path %}active{% endif %}" href="{% url "fund_wallet" %}">Fund Wallet</a>
         {% comment %} <a class="nav-link" href="./wallet-deposit.html">Deposit</a> {% endcomment %}
         {% comment %} <a class="nav-link" href="./wallet-transactions.html">Transactions</a> {% endcomment %}
         {% comment %} <a class="nav-link" href="./tts.html">Text To Speech Generator</a> {% endcomment %}
         {% comment %} <a class="nav-link" href="./tts-history.html">Text To Speech History</a> {% endcomment %}
         <a class="nav-link {% if 'my-accounts' in request.path %}active{% endif %}" href="{% url "store:my_accounts" %}">My Accounts</a>
-        
         <a class="nav-link {% if 'platforms' in request.path %}active{% endif %}" href="{% url "store:platform_list" %}">Platform List</a>
         {% if request.user.role == 'admin' %}
+        <a class="nav-link" href="{% url "admin_dashboard" %}">Admin Analytics</a>
+        <a class="nav-link" href="{% url "admin_users" %}">Admin Users</a>
           <a class="nav-link {% if 'products' in request.path %}active{% endif %}" href="{% url "store:product_list" %}">Product List</a>
-          <a class="nav-link" href="{% url "admin_dashboard" %}">Admin Analytics</a>
-          <a class="nav-link" href="{% url "admin_users" %}">Admin Users</a>
           <a class="nav-link {% if 'add-products' in request.path %}active{% endif %}" href="{% url "store:add_products" %}">Add Products</a>
           <a class="nav-link {% if 'inbox' in request.path %}active{% endif %}" href="{% url "inbox" %}">Inbox</a>
+          <a class="nav-link {% if 'order-issues' in request.path %}active{% endif %}" href="{% url 'store:order_issues' %}">Order Issues</a>
         {% endif %}
         <div class="sidebar-footer">
           <a

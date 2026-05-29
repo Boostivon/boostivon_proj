@@ -1,0 +1,48 @@
+{% extends "partials/base.html" %} {% load static %}
+{% block title %}Order Detail{% endblock title %}
+{% block content %}
+<div class="page-header">
+    <h1>Order #{{ order.id }}</h1>
+    <p>Detailed information about this order and its provider issue.</p>
+</div>
+<div class="card pad">
+    <h2>Order Information</h2>
+    <div style="height: 12px;"></div>
+    <div class="list">
+        <div class="list-item">
+            <strong>User</strong>
+            <div>{{ order.user.email }}</div>
+        </div>
+        <div class="list-item">
+            <strong>Service</strong>
+            <div>{{ order.service.name }}</div>
+        </div>
+        <div class="list-item">
+            <strong>Quantity</strong>
+            <div>{{ order.quantity }}</div>
+        </div>
+        <div class="list-item">
+            <strong>Total Price</strong>
+            <div>₦{{ order.total_price|floatformat:2 }}</div>
+        </div>
+        <div class="list-item">
+            <strong>Provider Status</strong>
+            <div>{{ order.provider_status|title }}</div>
+        </div>
+        <div class="list-item">
+            <strong>Provider Response</strong>
+            <pre style="max-height:200px; overflow:auto;">{{ order.provider_response|default:'{}' }}</pre>
+        </div>
+        <div class="list-item">
+            <strong>Created At</strong>
+            <div>{{ order.created_at|date:'M d, Y H:i' }}</div>
+        </div>
+    </div>
+
+    {% comment %} {% if order.provider_status != 'completed' %}
+    <form method="post" style="margin-top: 1rem;">
+        {% csrf_token %}
+        <button type="submit" name="action" value="mark_resolved" class="btn btn-primary">Mark as Provider-Resolved</button>
+    </form>
+    {% endif %} {% endcomment %}
+{% endblock content %}

@@ -19,6 +19,8 @@ from store.views import (
     purchase,
     initialize_product_purchase,
     my_accounts,
+    admin_order_issues,
+    admin_order_detail
 )
 
 app_name = 'store'
@@ -42,4 +44,6 @@ urlpatterns = [
     path('purchase/', purchase, name='purchase'),
     path('purchase/initialize/<uuid:order_id>/', initialize_product_purchase, name='initialize_product_purchase'),
     path('my-accounts/', my_accounts, name='my_accounts'),
+    path('order-issues/', admin_order_issues, name='order_issues'),
+    path('order-issues/<int:order_id>/detail/', admin_order_detail, name='order_issue_detail'),
 ]

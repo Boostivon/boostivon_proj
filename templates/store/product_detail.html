@@ -10,19 +10,19 @@
         <div class="card pad">
             <div class="muted">Platform</div>
             <h2 style="margin:0.25rem 0">{{ product.platform.name }}</h2>
-            <div class="muted">Username</div>
-            <h3 style="margin:0.25rem 0">@{{ product.username }}</h3>
-            <p class="muted" style="margin-top: 0.5rem;">{{ product.description|default:"No additional details provided." }}</p>
+            <div class="muted">Account Info</div>
+            <h3 style="margin:0.25rem 0">{{ product.logs|default:"No account notes" }}</h3>
+            <p class="muted" style="margin-top: 0.5rem;">{{ product.platform.description|default:"No additional details provided." }}</p>
 
             <div style="margin-top: 1rem; display:flex; gap:0.6rem; align-items:center;">
-                {% comment %} <a class="btn btn-primary" href="#">Buy Now — ₦{{ product.price|floatformat:2 }}</a> {% endcomment %}
+                {% comment %} <a class="btn btn-primary" href="#">Buy Now — ₦{{ product.platform.price|floatformat:2 }}</a> {% endcomment %}
                 <a class="btn btn-outline" href="{{ product.link }}" target="_blank" rel="noopener">View Profile</a>
             </div>
         </div>
 
         <div class="card pad">
             <div class="stat-title">Availability</div>
-            <div class="stat-value">{{ product.quantity|default:"N/A" }}</div>
+            <div class="stat-value">{{ product.platform.quantity|default:"N/A" }}</div>
             <div style="height:12px"></div>
             <div class="list" style="margin-top:0.5rem;">
                 <div class="list-item">

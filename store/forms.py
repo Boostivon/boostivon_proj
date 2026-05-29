@@ -16,14 +16,12 @@ class SocialMediaAccountForm(forms.ModelForm):
         model = SocialMediaAccount
         fields = [
             'platform',
-            'username',
-            'access_pswd',
+            'logs',
             'link'
         ]
         widgets = {
             'platform': forms.Select(attrs={'class': 'input'}),
-            'username': forms.TextInput(attrs={'class': 'input'}),
-            'access_pswd': forms.PasswordInput(attrs={'class': 'input'}),
+            'logs': forms.Textarea(attrs={'class': 'input', 'rows': 4}),
             'link': forms.URLInput(attrs={'class': 'input'}),
         }
         

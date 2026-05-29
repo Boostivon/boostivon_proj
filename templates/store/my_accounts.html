@@ -16,8 +16,7 @@
       <thead>
         <tr>
           <th>Platform</th>
-          <th>Username</th>
-          <th>Password</th>
+          <th>Account Info</th>
           <th>Link</th>
           <th class="text-right">Assigned Date</th>
         </tr>
@@ -26,11 +25,10 @@
         {% for user_account in user_accounts %}
           <tr>
             <td>{{ user_account.account.platform.name|title }}</td>
-            <td>{{ user_account.account.username }}</td>
             <td>
               <details>
-                <summary>Show</summary>
-                <code>{{ user_account.account.access_pswd }}</code>
+                <summary>Details</summary>
+                <code>{{ user_account.account.logs|default:"No details available" }}</code>
               </details>
             </td>
             <td>
