@@ -1,57 +1,40 @@
-{% extends "partials/base.html" %}
-{% load static %}
+{% extends "partials/base.html" %} {% load static %}
 {% block title %}Products{% endblock title %}
 {% block content %}
-<div class="page-header">
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-    <div>
-      <h1>Products</h1>
-      <p>Manage your social media product inventory.</p>
-    </div>
-    {% if request.user.is_authenticated and request.user.role == 'admin' %}
-      <a class="btn btn-primary" href="{% url 'store:add_products' %}">Add Product</a>
-    {% endif %}
+  <div class="page-header">
+    <h1>Products</h1>
+    <p>Manage all social media accounts available for purchase on the platform.</p>
   </div>
-</div>
-<div style="height: 20px;"></div>
-<div class="table-wrap">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Platform</th>
-        {% comment %} <th>Username</th> {% endcomment %}
-        <th class="text-right">Price</th>
-        <th>Description</th>
-        <th class="text-right">Date Added</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% if products %}
-        {% for product in products %}
-          <tr>
-            <td>{{ product.name|title }}</td>
-            {% comment %} <td>{{ product.username }}</td> {% endcomment %}
-            <td class="text-right">₦{{ product.price|floatformat:2 }}</td>
-            <td>{{ product.description|default:"—" }}</td>
-            <td class="text-right">{{ product.created_at|date:'M j, Y' }}</td>
-            <td class="actions">
-              {% if request.user.role == 'admin' %}
-                <a href="{% url 'store:edit_platform' product.id %}" class="btn btn-sm btn-outline"><i class="bi bi-pencil-square"></i></a>
-                <a href="{% url 'store:delete_platform' product.id %}" class="btn btn-sm btn-outline"><i class="bi bi-trash"></i></a>
-              {% endif %}
-            </td>
-            <td>
-                <a href="{% url 'store:view_platform' product.id %}" class="btn btn-sm btn-outline">View</a>
-            </td>
-          </tr>
-        {% endfor %}
-      {% else %}
-        <tr>
-          <td colspan="6" class="text-center">No products available.</td>
-        </tr>
-      {% endif %}
-    </tbody>
-  </table>
-</div>
+
+  {% if products %}
+    <div class="cards-grid cols-3" style="margin-top: 1rem; gap: 0.9rem;">
+      {% for product in products %}
+        <div class="card pad">
+          <div class="flex-between" style="align-items: flex-start;">
+            <div style="min-width: 0; flex: 1;">
+              <div class="muted" style="font-size:0.82rem;">Platform</div>
+              <h3 style="margin: 0.25rem 0;">{{ product.platform.name }}</h3>
+              <div class="muted">@{{ product.username }}</div>
+              <p class="muted" style="margin-top: 0.6rem; font-size: 0.92rem;">{{ product.description|default:"No description" }}</p>
+            </div>
+            <div style="text-align: right;">
+              <div class="stat-title">Price</div>
+              <div class="stat-value">₦{{ product.price|floatformat:2 }}</div>
+              <div style="height: 12px"></div>
+              <a href="{% url 'store:product_detail' product.id %}" class="btn btn-outline">View</a>
+            </div>
+          </div>
+
+          <div style="margin-top: 0.85rem; display:flex; justify-content:space-between; align-items:center; gap: 0.5rem;">
+            <div class="muted">Added {{ product.created_at|date:"M d, Y" }}</div>
+            <div class="actions">
+              <a class="btn btn-primary" href="{% url 'store:product_detail' product.id %}">Buy Now</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty" style="margin-top: 1rem;">No products available yet.</div>
+  {% endif %}
 {% endblock content %}

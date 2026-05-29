@@ -2,7 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.home, name='home'),
+    path('', views.landing, name='landing'),
+    path('dashboard/', views.home, name='home'),
     path('register/', views.register, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
@@ -15,7 +16,7 @@ urlpatterns = [
     path('password-reset/', views.reset_password, name='reset_password'),
     path('password-reset/<str:reset_token>/', views.confirm_password_reset, name='password_reset_confirm'),
     
-    path('dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('users/', views.admin_users, name='admin_users'),
     path('search-users/', views.search_users, name='search_users'),
     
@@ -26,4 +27,7 @@ urlpatterns = [
     path('inbox/<int:email_id>/', views.email_detail, name='email_detail'),
     path('webhooks/resend/', views.resend_webhook, name='resend_webhook'),
 
+    path('fund-wallet/', views.fund_account, name='fund_wallet'),
+    path('payment-callback/', views.payment_callback, name='payment_callback'),
+    path('initialize-payment/<amount>/', views.initialize_payment, name='initialize_payment'),
 ]

@@ -1,0 +1,25 @@
+
+{% extends "partials/base.html" %} {% load static %}
+{% block title %}Fund Wallet{% endblock title %}
+{% block content %}
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="logo-badge">
+      <img src="{% static 'img/logo.png' %}" alt="Boostivon Logo" />
+    </div>
+    <h1 class="auth-title text-center">Fund Wallet</h1>
+    <p class="auth-subtitle text-center">Add funds to your Boostivon wallet securely.</p>
+
+    <form class="form-stack" method="post">
+      {% csrf_token %}
+      <div class="field">
+        <label>Amount (₦)</label>
+        <input class="input" type="number" name="amount" min="1000" step="100" placeholder="1000" required />
+      </div>
+      <button class="btn btn-primary purchase-btn" type="submit">Fund account</button>
+    </form>
+
+    <p class="auth-footer">Minimum deposit ₦1000. <a href="{% url 'profile' %}">Back to profile</a></p>
+  </div>
+</div>
+{% endblock content %}

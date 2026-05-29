@@ -31,8 +31,16 @@ def custom_404_view(request, exception):
 def custom_500_view(request):
     return render(request, 'accounts/500.html', status=500)
 
+def landing(request):
+    return render(request, 'landing.html')
+
 @login_required(login_url='login')
 def home(request):
+    # Show landing page to unauthenticated users
+    if not request.user.is_authenticated:
+        return render(request, 'landing.html')
+    
+    # Show dashboard to authenticated users
     orders = Order.objects.filter(user=request.user)
     completed_orders_count = orders.filter(status='completed').count() if orders else 0
     tts_jobs_count = TextToSpeechRequest.objects.filter(user=request.user).count() if request.user.is_authenticated else 0
@@ -202,7 +210,6 @@ def change_password(request):
             return redirect('change_password')
     return render(request, 'accounts/change_password.html')
 
-
 def confirm_password_reset(request, reset_token):
     password_reset = get_object_or_404(PasswordReset, token=reset_token)
     if not password_reset.is_valid():
@@ -226,7 +233,6 @@ def confirm_password_reset(request, reset_token):
                 messages.error(request, 'Passwords do not match.')
 
     return render(request, 'accounts/change_password.html')
-
 
 def reset_password(request):
     if request.method == 'POST':
@@ -483,3 +489,100 @@ def email_detail(request, email_id):
     return render(request, 'accounts/email_detail.html', {
         'email': email
     })
+    
+@login_required(login_url='login')
+def fund_account(request):
+    if request.method == 'POST':
+        
+        amount = float(request.POST.get('amount'))
+        
+        if amount:
+            if amount >= 1000:
+                return redirect('initialize_payment', str(amount))
+            else:
+                messages.error(request, "Amount must not be less than ₦1000")
+                return redirect('fund_account')
+        else:
+            messages.error(request, "Enter an amount")
+            return redirect('fund_account')
+    
+    return render(request, 'accounts/fund_account.html')
+
+def initialize_payment(request, amount):
+    secret_key = getattr(settings, 'FLUTTERWAVE_SECRET_KEY', None)
+    if not secret_key:
+        messages.error(request, "Payment gateway is not configured.")
+        return redirect('fund_account')
+    headers = {
+        'Authorization': f'Bearer {secret_key}',
+        'Content-Type': 'application/json',
+    }
+    data = {
+        'tx_ref': f'{request.user.id}_{int(timezone.now().timestamp())}',
+        'amount': f'{float(amount)}',
+        'currency': 'NGN',
+        'redirect_url': request.build_absolute_uri('/payment-callback/'),
+        'customer': {
+            'email': request.user.email,
+            'name': request.user.username,
+        },
+        'customizations': {
+            'title': f'Account Funding - {request.user.username}',
+            'description': 'BOOSTIVON',
+        },
+    }
+    try:
+        response = requests.post('https://api.flutterwave.com/v3/payments', headers=headers, json=data, timeout=10)
+        response_data = response.json()
+        if response.ok and response_data.get('status') == 'success':
+            payment_link = response_data['data']['link']
+            return redirect(payment_link)
+        else:
+            messages.error(request, "Failed to initialize payment. Please try again.")
+            return redirect('fund_account')
+    except requests.RequestException:
+        messages.error(request, "An error occurred while connecting to the payment gateway. Please try again.")
+        return redirect('fund_account')
+    
+def payment_callback(request):
+    status = request.GET.get('status')
+    tx_ref = request.GET.get('tx_ref')
+    transaction_id = request.GET.get('transaction_id')
+
+    if status in ['successful', 'completed'] and tx_ref and transaction_id:
+        secret_key = getattr(settings, 'FLUTTERWAVE_SECRET_KEY', None)
+        if not secret_key:
+            messages.error(request, "Payment gateway is not configured.")
+            return redirect('home')
+        headers = {
+            'Authorization': f'Bearer {secret_key}',
+        }
+        try:
+            response = requests.get(f'https://api.flutterwave.com/v3/transactions/{transaction_id}/verify', headers=headers, timeout=10)
+            response_data = response.json()
+            if response.ok and response_data.get('status') == 'success':
+                amount = float(response_data['data']['amount'])
+                request.user.wallet_balance += Decimal(amount)
+                request.user.save()
+                Transaction.objects.create(
+                    user=request.user,
+                    amount=Decimal(amount),
+                    transaction_type='deposit',
+                    status='completed',
+                    reference=tx_ref,
+                    transaction_id=transaction_id,
+                )
+                messages.success(request, "Your account has been funded successfully!")
+                return redirect('home')
+            else:
+                messages.error(request, "Payment verification failed. Please contact support.")
+                return redirect('home')
+        except requests.RequestException:
+            messages.error(request, "An error occurred while verifying the payment. Please contact support.")
+            return redirect('home')
+    else:
+        messages.error(request, "Payment was not successful. Please try again.")
+        return redirect('home')
+    
+    
+        

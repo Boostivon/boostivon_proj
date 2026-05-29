@@ -106,10 +106,15 @@ class Platform(models.Model):
         return self.name
     
     def accounts_count(self):
-        return SocialMediaAccount.objects.filter(platform=self).count()
+        return SocialMediaAccount.objects.filter(platform=self, is_assigned=False).count()
     
-    # calculate quantity  of platform based on number of social media accounts available for that platform
+    # calculate quantity of platform based on number of social media accounts available for that platform
     def save(self, *args, **kwargs):
+        if self.pk is None:
+            self.quantity = 0
+            super().save(*args, **kwargs)
+            return
+
         self.quantity = self.accounts_count()
         super().save(*args, **kwargs)
         
@@ -132,6 +137,7 @@ class Transaction(models.Model):
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPE_CHOICES)  # e.g., 'deposit', 'withdrawal'
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     reference = models.CharField(max_length=255, unique=True)
+    transaction_id = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

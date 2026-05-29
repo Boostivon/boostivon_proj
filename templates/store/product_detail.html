@@ -1,0 +1,39 @@
+{% extends "partials/base.html" %} {% load static %}
+{% block title %}Product Details{% endblock title %}
+{% block content %}
+    <div class="page-header">
+        <h1>Product</h1>
+        <p>Detailed information about the selected social media account.</p>
+    </div>
+
+    <div class="cards-grid cols-2" style="margin-top: 1rem; gap: 1rem;">
+        <div class="card pad">
+            <div class="muted">Platform</div>
+            <h2 style="margin:0.25rem 0">{{ product.platform.name }}</h2>
+            <div class="muted">Username</div>
+            <h3 style="margin:0.25rem 0">@{{ product.username }}</h3>
+            <p class="muted" style="margin-top: 0.5rem;">{{ product.description|default:"No additional details provided." }}</p>
+
+            <div style="margin-top: 1rem; display:flex; gap:0.6rem; align-items:center;">
+                {% comment %} <a class="btn btn-primary" href="#">Buy Now — ₦{{ product.price|floatformat:2 }}</a> {% endcomment %}
+                <a class="btn btn-outline" href="{{ product.link }}" target="_blank" rel="noopener">View Profile</a>
+            </div>
+        </div>
+
+        <div class="card pad">
+            <div class="stat-title">Availability</div>
+            <div class="stat-value">{{ product.quantity|default:"N/A" }}</div>
+            <div style="height:12px"></div>
+            <div class="list" style="margin-top:0.5rem;">
+                <div class="list-item">
+                    <strong>Added</strong>
+                    <div class="muted">{{ product.created_at|date:"M d, Y" }}</div>
+                </div>
+                <div class="list-item">
+                    <strong>Link</strong>
+                    <div class="muted"><a href="{{ product.link }}" target="_blank" rel="noopener">Open profile</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

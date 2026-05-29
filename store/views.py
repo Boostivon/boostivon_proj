@@ -41,98 +41,38 @@ def create_order(request):
 
 @login_required(login_url='login')
 def initialize_payment(request, order_id):
+    # use wallet balance
     order = get_object_or_404(Order, id=order_id, user=request.user)
-    secret_key = getattr(settings, 'FLUTTERWAVE_SECRET_KEY', None)
-    if not secret_key:
-        return render(request, 'store/payment_status.html', {
-            'order': order,
-            'title': 'Payment Configuration Error',
-            'message': 'Flutterwave secret key is missing. Please configure FLUTTERWAVE_SECRET_KEY.',
-            'success': False,
-        })
-
-    tx_ref = f"boostivon-order-{order.id}-{uuid.uuid4().hex[:8]}"
-    callback_url = request.build_absolute_uri(reverse('store:payment_callback', args=[order.id]))
-
-    payload = {
-        'tx_ref': tx_ref,
-        'amount': str(order.total_price),
-        'currency': 'NGN',
-        'redirect_url': callback_url,
-        'customer': {
-            'email': request.user.email,
-            'name': request.user.get_full_name() or request.user.email,
-        },
-        'meta': {
-            'order_id': order.id,
-        },
-        'customizations': {
-            'title': f'Payment for order #{order.id}',
-            'description': f'Payment for {order.service.name} x {order.quantity}',
-        },
-    }
-
-    response = requests.post(
-        'https://api.flutterwave.com/v3/payments',
-        headers={
-            'Authorization': f'Bearer {secret_key}',
-            'Content-Type': 'application/json',
-        },
-        json=payload,
-        timeout=30,
-    )
-
-    if response.status_code != 200:
-        return render(request, 'store/payment_status.html', {
-            'order': order,
-            'title': 'Payment Initialization Failed',
-            'message': f'Could not start Flutterwave payment. ({response.status_code})',
-            'success': False,
-        })
-
-    data = response.json()
-    if data.get('status') != 'success' or not data.get('data'):
-        error_message = data.get('message', 'Unable to initialize payment with Flutterwave.')
-        return render(request, 'store/payment_status.html', {
-            'order': order,
-            'title': 'Payment Initialization Failed',
-            'message': error_message,
-            'success': False,
-        })
-
-    payment_link = data['data'].get('link')
-    if not payment_link:
-        return render(request, 'store/payment_status.html', {
-            'order': order,
-            'title': 'Payment Initialization Failed',
-            'message': 'Flutterwave did not return a payment link.',
-            'success': False,
-        })
-
-    return redirect(payment_link)
-
-def verify_flutterwave_transaction(transaction_id=None, tx_ref=None):
-    secret_key = getattr(settings, 'FLUTTERWAVE_SECRET_KEY', None)
-    if not secret_key or (not transaction_id and not tx_ref):
-        return None
-
-    if transaction_id:
-        url = f'https://api.flutterwave.com/v3/transactions/{transaction_id}/verify'
-    else:
-        url = f'https://api.flutterwave.com/v3/transactions/verify_by_tx_ref?tx_ref={tx_ref}'
-
-    response = requests.get(
-        url,
-        headers={
-            'Authorization': f'Bearer {secret_key}',
-        },
-        timeout=30,
-    )
-    if response.status_code != 200:
-        return None
-    data = response.json()
-    return data if data.get('status') == 'success' else None
-
+    if request.user.wallet_balance >= order.total_price:
+        order.status = 'completed'
+        order.save()
+        request.user.wallet_balance -= order.total_price
+        request.user.save()
+        
+        # call the-owlet API to process the order
+        provider = TheOwletAPI()
+        provider_response = provider.create_order(
+            service_id=order.service.provider_service_id,
+            link=order.target_link,
+            quantity=order.quantity
+        )
+        order.provider_response = provider_response
+        
+        if provider_response.get('success'):
+            order.provider_order_id = provider_response.get('provider_order_id')
+            order.provider_status = 'pending'
+            order.save()
+        else:
+            order.provider_order_id = provider_response.get('provider_order_id')
+            order.provider_status = 'failed'
+            order.save()
+            title = 'Order Processing Failed'
+            message = 'Payment was successful, but there was an issue processing your order with the provider. Please contact support.'
+            success = False
+        
+        messages.success(request, 'Payment successful using wallet balance. Your order is now completed.')
+        return redirect('store:orders')
+    
 def assign_accounts_to_user(user, platform, quantity, account_order):
     """Assign available social media accounts to the user after successful purchase"""
     available_accounts = SocialMediaAccount.objects.filter(
@@ -155,64 +95,6 @@ def assign_accounts_to_user(user, platform, quantity, account_order):
     
     return assigned_count
 
-def payment_callback(request, order_id):
-    # Callback requests from Flutterwave may not preserve the user's session,
-    # so do not require the callback to be authenticated. Locate the order
-    # by its id only and then verify the transaction via Flutterwave.
-    order = get_object_or_404(Order, id=order_id)
-    transaction_id = request.GET.get('transaction_id')
-    tx_ref = request.GET.get('tx_ref')
-    status = request.GET.get('status')
-
-    if transaction_id or tx_ref:
-        verification = verify_flutterwave_transaction(transaction_id=transaction_id, tx_ref=tx_ref)
-        if verification and verification.get('data', {}).get('status') in ('successful', 'completed'):
-            order.status = 'completed'
-            order.save()
-            title = 'Payment Success'
-            message = 'Payment completed successfully. Your order has been marked as completed.'
-            success = True
-            
-            # call the-owlet API to process the order
-            provider = TheOwletAPI()
-            provider_response = provider.create_order(
-                service_id=order.service.provider_service_id,
-                link=order.target_link,
-                quantity=order.quantity
-            )
-            order.provider_response = provider_response
-            
-            if provider_response.get('success'):
-                order.provider_order_id = provider_response.get('provider_order_id')
-                order.provider_status = 'pending'
-                order.save()
-            else:
-                order.provider_order_id = provider_response.get('provider_order_id')
-                order.provider_status = 'failed'
-                order.save()
-                title = 'Order Processing Failed'
-                message = 'Payment was successful, but there was an issue processing your order with the provider. Please contact support.'
-                success = False
-            
-        else:
-            title = 'Payment Failed'
-            message = 'Payment could not be verified. Your order remains pending.'
-            success = False
-    elif status in ('cancelled', 'failed', 'error'):
-        title = 'Payment Failed'
-        message = 'Payment was not completed. Your order remains pending.'
-        success = False
-    else:
-        title = 'Payment Status Unknown'
-        message = 'The payment result could not be determined. Please check your transaction status.'
-        success = False
-
-    return render(request, 'store/payment_status.html', {
-        'order': order,
-        'title': title,
-        'message': message,
-        'success': success,
-    })
 
 def get_service_price(request):
     service_id = request.GET.get('service_id')
@@ -330,7 +212,20 @@ def delete_platform(request, platform_id):
 def platform_list(request):
      
     platform = Platform.objects.all().order_by('-created_at')
-    return render(request, 'store/product_list.html', {'products': platform})
+    return render(request, 'store/platform_list.html', {'products': platform})
+
+@login_required(login_url='login')
+def product_list(request):
+    if request.user.role != 'admin':
+        messages.error(request, 'You do not have permission to view this page.')
+        return redirect('home')
+    products = SocialMediaAccount.objects.all().order_by('-created_at')
+    return render(request, 'store/product_list.html', {'products': products})
+
+@login_required(login_url='login')
+def product_detail(request, product_id):
+    product = get_object_or_404(SocialMediaAccount, id=product_id)
+    return render(request, 'store/product_detail.html', {'product': product})
 
 @login_required(login_url='login')
 def my_accounts(request):
@@ -350,12 +245,14 @@ def purchase(request):
         quantity = int(request.POST.get('quantity', 1))
         
         if not platform_id or quantity <= 0:
-            return JsonResponse({'error': 'Invalid platform or quantity'}, status=400)
+            messages.error(request, 'Invalid platform or quantity')
+            return redirect('store:platform_list')
         
         try:
             platform = Platform.objects.get(id=platform_id)
         except Platform.DoesNotExist:
-            return JsonResponse({'error': 'Platform not found'}, status=404)
+            messages.error(request, 'Platform not found')
+            return redirect('store:platform_list')
         
         # Check if enough accounts are available
         available_accounts = SocialMediaAccount.objects.filter(
@@ -365,9 +262,8 @@ def purchase(request):
         ).count()
         
         if available_accounts < quantity:
-            return JsonResponse({
-                'error': f'Only {available_accounts} accounts available for {platform.name}'
-            }, status=400)
+            messages.error(request, f'Only {available_accounts} accounts available for {platform.name}')
+            return redirect('store:view_platform', platform_id=platform.id)
         
         # Create the order
         order = AccountOrder.objects.create(
@@ -380,111 +276,29 @@ def purchase(request):
         # Redirect to payment initialization
         return redirect('store:initialize_product_purchase', order_id=order.order_id)
     
-    return JsonResponse({'error': 'Method not allowed'}, status=405)
+    messages.error(request, 'Invalid request method')
+    return redirect('store:platform_list')
 
 @login_required(login_url='login')
 def initialize_product_purchase(request, order_id):
+    # use wallet balance
     order = get_object_or_404(AccountOrder, order_id=order_id, user=request.user)
-    secret_key = getattr(settings, 'FLUTTERWAVE_SECRET_KEY')
-    if not secret_key:
-        return render(request, 'store/payment_status.html', {
-            'order': order,
-            'title': 'Payment Configuration Error',
-            'message': 'Flutterwave secret key is missing. Please configure FLUTTERWAVE_SECRET_KEY.',
-            'success': False,
-        })
-    tx_ref = f"boostivon-product-{order.order_id}-{uuid.uuid4().hex[:8]}"
-    callback_url = request.build_absolute_uri(reverse('store:verify_product_payment', args=[order.order_id]))
-    payload = {
-        'tx_ref': tx_ref,
-        'amount': str(order.total_price),
-        'currency': 'NGN',
-        'redirect_url': callback_url,
-        'customer': {
-            'email': request.user.email,
-            'name': request.user.get_full_name() or request.user.email,
-        },
-        'meta': {
-            'order_id': order.order_id,
-        },
-        'customizations': {
-            'title': f'Payment for {order.platform.name} x {order.quantity}',
-            'description': f'Payment for {order.platform.name} x {order.quantity}',
-        },
-    }
-    response = requests.post(
-        'https://api.flutterwave.com/v3/payments',
-        headers={
-            'Authorization': f'Bearer {secret_key}',
-            'Content-Type': 'application/json',
-        },
-        json=payload,
-        timeout=30,
-    )
-    if response.status_code != 200:
-        return render(request, 'store/payment_status.html', {
-            'order': order,
-            'title': 'Payment Initialization Failed',
-            'message': f'Could not start Flutterwave payment. ({response.status_code})',
-            'success': False,
-        })
-    data = response.json()
-    if data.get('status') != 'success' or not data.get('data'):
-        error_message = data.get('message', 'Unable to initialize payment with Flutterwave.')
-        return render(request, 'store/payment_status.html', {
-            'order': order,
-            'title': 'Payment Initialization Failed',
-            'message': error_message,
-            'success': False,
-        })
-    payment_link = data['data'].get('link')
-    if not payment_link:
-        return render(request, 'store/payment_status.html', {
-            'order': order,
-            'title': 'Payment Initialization Failed',
-            'message': 'Flutterwave did not return a payment link.',
-            'success': False,
-        })
-    return redirect(payment_link)
-
-def verify_product_payment(request, order_id):
-    order = get_object_or_404(AccountOrder, order_id=order_id)
-    platform = order.platform
-    transaction_id = request.GET.get('transaction_id')
-    tx_ref = request.GET.get('tx_ref')
-    status = request.GET.get('status')
-    if transaction_id or tx_ref:
-        verification = verify_flutterwave_transaction(transaction_id=transaction_id, tx_ref=tx_ref)
-        if verification and verification.get('data', {}).get('status') in ('successful', 'completed'):
-            order.status = 'completed'
-            order.save()
-            
-            # Assign accounts to user
-            assigned_count = assign_accounts_to_user(order.user, platform, order.quantity, order)
-            
-            # Deduct from platform quantity
-            platform.quantity -= assigned_count
-            platform.save()
-            
-            title = 'Payment Success'
-            message = f'Payment completed successfully. {assigned_count} {platform.name} accounts have been assigned to you.'
-            success = True
-        else:
-            title = 'Payment Failed'
-            message = 'Payment could not be verified. Your order remains pending.'
-            success = False
-    elif status in ('cancelled', 'failed', 'error'):
-        title = 'Payment Failed'
-        message = 'Payment was not completed. Your order remains pending.'
-        success = False
+    if request.user.wallet_balance >= order.total_price:
+        order.status = 'completed'
+        order.save()
+        request.user.wallet_balance -= order.total_price
+        request.user.save()
+        
+        # Assign accounts to user
+        assigned_count = assign_accounts_to_user(order.user, order.platform, order.quantity, order)
+        
+        title = 'Purchase Successful'
+        message = f'Purchase completed successfully. {assigned_count} {order.platform.name} accounts have been assigned to you.'
+        success = True
+        
+        messages.success(request, message)
+        return redirect('store:my_accounts')
     else:
-        title = 'Payment Status Unknown'
-        message = 'The payment result could not be determined. Please check your transaction status.'
-        success = False
-    return render(request, 'store/payment_status.html', {
-        'order': order,
-        'title': title,
-        'message': message,
-        'success': success,
-    })
+        messages.error(request, 'Insufficient wallet balance. Please fund your wallet to complete the purchase.')
+        return redirect('fund_wallet')
     

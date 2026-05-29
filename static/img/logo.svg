@@ -1,0 +1,29 @@
+<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#051edb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00b1fb;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="20" cy="20" r="20" fill="url(#gradient)" opacity="0.1"/>
+  
+  <!-- Main icon - stylized rocket/growth -->
+  <g transform="translate(20, 20)">
+    <!-- Rocket body -->
+    <path d="M 0 -8 L 3 2 L 0 4 L -3 2 Z" fill="url(#gradient)" stroke="none"/>
+    
+    <!-- Rocket flame -->
+    <path d="M -1.5 4 L -2 8 L 0 6 L 2 8 L 1.5 4 Z" fill="url(#gradient)" opacity="0.8"/>
+    
+    <!-- Wings -->
+    <circle cx="-4" cy="0" r="2" fill="url(#gradient)" opacity="0.6"/>
+    <circle cx="4" cy="0" r="2" fill="url(#gradient)" opacity="0.6"/>
+    
+    <!-- Star trail -->
+    <circle cx="-6" cy="-6" r="0.8" fill="url(#gradient)" opacity="0.4"/>
+    <circle cx="6" cy="-8" r="0.6" fill="url(#gradient)" opacity="0.5"/>
+    <circle cx="-5" cy="6" r="0.7" fill="url(#gradient)" opacity="0.3"/>
+  </g>
+</svg>

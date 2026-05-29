@@ -1,0 +1,431 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Boostivon - Automate social media growth, manage wallets, generate AI voice content, and fulfill orders instantly." />
+    <meta name="keywords" content="social media growth, AI text-to-speech, wallet management, automation, social media automation" />
+    <meta name="author" content="Boostivon" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Boostivon - Smarter Social Growth Automation Platform" />
+    <meta property="og:description" content="Automate social media growth, manage wallets, generate AI voice content, and fulfill orders instantly." />
+    <meta property="og:url" content="https://boostivon.com" />
+    <meta property="og:image" content="{% static 'img/og-image.png' %}" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Boostivon - Smarter Social Growth Automation Platform" />
+    <meta name="twitter:description" content="Automate social media growth, manage wallets, generate AI voice content, and fulfill orders instantly." />
+    <meta name="twitter:image" content="{% static 'img/twitter-card.png' %}" />
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Boostivon",
+      "description": "Automate social media growth, manage wallets, generate AI voice content, and fulfill orders instantly.",
+      "url": "https://boostivon.com",
+      "applicationCategory": "BusinessApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "NGN"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "200"
+      }
+    }
+    </script>
+    
+    <title>Boostivon - Smarter Social Growth Automation Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'css/landing.css' %}" />
+    <link rel="icon" href="{% static 'img/logo.png' %}" type="image/svg+xml" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="navbar-container">
+        <div class="navbar-brand">
+          <img src="{% static 'img/logo.png' %}" alt="Boostivon" class="navbar-logo" />
+          <span class="navbar-wordmark">Boostivon</span>
+        </div>
+        
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        
+        <div class="navbar-menu" id="navbarMenu">
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#services" class="nav-link">Services</a>
+          <a href="#about" class="nav-link">About</a>
+          <a href="#contact" class="nav-link">Contact</a>
+        </div>
+        
+        <div class="navbar-actions">
+          {% comment %} <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <span class="theme-icon">🌙</span>
+          </button> {% endcomment %}
+          {% if request.user.is_authenticated %}
+          <a href="{% url "home" %}" class="btn btn-ghost">Dashboard</a>
+          {% else %}
+          <a href="{% url 'login' %}" class="btn btn-ghost">Sign In</a>
+          <a href="{% url 'register' %}" class="btn btn-primary">Get Started</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-left">
+          <h1 class="hero-title">
+            Powering smarter<br />social growth with<br />automation and AI
+          </h1>
+          
+          <p class="hero-subtitle">
+            Automate your social media growth, manage wallets securely, generate AI voice content, and fulfill orders in real-time. Built for creators and businesses.
+          </p>
+          
+          <div class="hero-actions">
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Get Started Free</a>
+            <a href="#features" class="btn btn-outline btn-lg">Learn More</a>
+          </div>
+          
+          <div class="hero-benefits">
+            <div class="benefit">
+              <span class="benefit-icon">⚡</span>
+              <span class="benefit-text">Instant processing</span>
+            </div>
+            <div class="benefit">
+              <span class="benefit-icon">🔒</span>
+              <span class="benefit-text">Secure transactions</span>
+            </div>
+            <div class="benefit">
+              <span class="benefit-icon">🤖</span>
+              <span class="benefit-text">AI-powered tools</span>
+            </div>
+            <div class="benefit">
+              <span class="benefit-icon">📊</span>
+              <span class="benefit-text">Real-time tracking</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="hero-right">
+          <div class="dashboard-mock">
+            <div class="dashboard-card wallet-card">
+              <div class="card-header">Wallet Balance</div>
+              <div class="card-amount">₦45,230</div>
+              <div class="card-label">Available</div>
+            </div>
+            
+            <div class="dashboard-card orders-card">
+              <div class="card-header">Active Orders</div>
+              <div class="card-count">24</div>
+              <div class="card-chart">
+                <div class="chart-bar" style="height: 60%"></div>
+                <div class="chart-bar" style="height: 80%"></div>
+                <div class="chart-bar" style="height: 40%"></div>
+                <div class="chart-bar" style="height: 90%"></div>
+              </div>
+            </div>
+            
+            <div class="dashboard-card transactions-card">
+              <div class="card-header">Recent</div>
+              <div class="transaction-item">
+                <span class="tx-label">Twitter Growth</span>
+                <span class="tx-amount">+₦5,000</span>
+              </div>
+              <div class="transaction-item">
+                <span class="tx-label">TTS Generation</span>
+                <span class="tx-amount">-₦2,450</span>
+              </div>
+            </div>
+            
+            <div class="dashboard-card activity-card">
+              <div class="card-header">Processing</div>
+              <div class="activity-dot active"></div>
+              <span class="activity-label">12 tasks running</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+      <div class="about-container">
+        <div class="section-header">
+          <h2 class="section-title">About Boostivon</h2>
+          <p class="section-subtitle">Trusted by creators and businesses worldwide</p>
+        </div>
+        
+        <div class="about-grid">
+          <div class="about-card">
+            <h3>For Creators</h3>
+            <p>Grow your audience faster with automated social media tools. Focus on content while we handle the growth.</p>
+          </div>
+          
+          <div class="about-card">
+            <h3>For Businesses</h3>
+            <p>Scale your online presence with AI-powered automation. Manage multiple platforms from one dashboard.</p>
+          </div>
+          
+          <div class="about-card">
+            <h3>For Everyone</h3>
+            <p>Simple pricing, powerful features, and support that cares. No technical skills required.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+      <div class="features-container">
+        <div class="section-header">
+          <h2 class="section-title">Powerful Features</h2>
+          <p class="section-subtitle">Everything you need to grow smarter</p>
+        </div>
+        
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">📱</div>
+            <h3 class="feature-title">Social Media Growth</h3>
+            <p class="feature-description">Automate growth across Twitter, Instagram, TikTok, LinkedIn, Facebook, and YouTube.</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">💳</div>
+            <h3 class="feature-title">Wallet System</h3>
+            <p class="feature-description">Fund your wallet securely, track transactions, and manage your balance in real-time.</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <h3 class="feature-title">AI Text-to-Speech</h3>
+            <p class="feature-description">Generate professional voice content with advanced AI. Perfect for videos and podcasts.</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">⚙️</div>
+            <h3 class="feature-title">Automated Fulfillment</h3>
+            <p class="feature-description">Orders processed instantly. Set it and forget it with our intelligent automation.</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3 class="feature-title">Secure Transactions</h3>
+            <p class="feature-description">Bank-level security for all payments. Your data is encrypted and protected.</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3 class="feature-title">Smart Tracking</h3>
+            <p class="feature-description">Real-time analytics and detailed reports. Track every order and transaction.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="services">
+      <div class="services-container">
+        <div class="section-header">
+          <h2 class="section-title">Our Services</h2>
+          <p class="section-subtitle">Comprehensive tools for social growth</p>
+        </div>
+        
+        <div class="services-grid">
+          <div class="service-item">
+            <div class="service-number">01</div>
+            <h3>Choose a Service</h3>
+            <p>Browse our wide range of social media growth services. Select followers, likes, comments, or engagement tailored to your needs.</p>
+          </div>
+          
+          <div class="service-item">
+            <div class="service-number">02</div>
+            <h3>Fund Your Wallet</h3>
+            <p>Add funds securely to your wallet or place an order directly. Multiple payment methods supported for your convenience.</p>
+          </div>
+          
+          <div class="service-item">
+            <div class="service-number">03</div>
+            <h3>Track Progress</h3>
+            <p>Watch your orders complete in real-time. Get instant notifications and detailed reports on every campaign.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Social Proof Section -->
+    <section class="social-proof">
+      <div class="proof-container">
+        <div class="section-header">
+          <h2 class="section-title">Trusted by Thousands</h2>
+          <p class="section-subtitle">Join creators and businesses growing with Boostivon</p>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="stat-number">50K+</div>
+            <div class="stat-label">Active Users</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">2M+</div>
+            <div class="stat-label">Orders Completed</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">₦5B+</div>
+            <div class="stat-label">Volume Processed</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">99.9%</div>
+            <div class="stat-label">Uptime</div>
+          </div>
+        </div>
+        
+        <div class="testimonials">
+          <div class="testimonial">
+            <div class="testimonial-content">
+              <p class="testimonial-text">"Boostivon transformed how I grow on social media. The automation is flawless and the results are incredible."</p>
+              <div class="testimonial-author">
+                <div class="author-avatar">AJ</div>
+                <div class="author-info">
+                  <div class="author-name">Adekunle Johnson</div>
+                  <div class="author-role">Content Creator</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="testimonial">
+            <div class="testimonial-content">
+              <p class="testimonial-text">"The wallet system is seamless and the customer support is outstanding. Highly recommended for anyone serious about growth."</p>
+              <div class="testimonial-author">
+                <div class="author-avatar">CM</div>
+                <div class="author-info">
+                  <div class="author-name">Chioma Musa</div>
+                  <div class="author-role">Business Owner</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="testimonial">
+            <div class="testimonial-content">
+              <p class="testimonial-text">"Best investment for my social media strategy. Real results, real support, real business growth."</p>
+              <div class="testimonial-author">
+                <div class="author-avatar">OT</div>
+                <div class="author-info">
+                  <div class="author-name">Oluwaseun Taiwo</div>
+                  <div class="author-role">Marketing Manager</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+      <div class="cta-container">
+        <h2 class="cta-title">Start Growing Smarter Today</h2>
+        <p class="cta-subtitle">Join thousands of creators and businesses already growing with Boostivon</p>
+        
+        <div class="cta-actions">
+          <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Create Free Account</a>
+          <a href="#contact" class="btn btn-outline btn-lg btn-white">Contact Sales</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+      <div class="contact-container">
+        <div class="section-header">
+          <h2 class="section-title">Get in Touch</h2>
+          <p class="section-subtitle">Have questions? Connect with us on your favorite platform</p>
+        </div>
+        
+        <div class="contact-grid">
+          <a href="https://wa.me/message/N2EQTT4Q6QJJA1" target="_blank" rel="noopener noreferrer" class="contact-card">
+            <div class="contact-icon">💬</div>
+            <h3>WhatsApp Direct</h3>
+            <p>Send us a message directly</p>
+          </a>
+          
+          <a href="https://chat.whatsapp.com/DU6s8TZ85g9AbjlLKXIrpi" target="_blank" rel="noopener noreferrer" class="contact-card">
+            <div class="contact-icon">👥</div>
+            <h3>WhatsApp Group</h3>
+            <p>Join our community</p>
+          </a>
+          
+          <a href="https://t.me/kingsocialnet" target="_blank" rel="noopener noreferrer" class="contact-card">
+            <div class="contact-icon">✈️</div>
+            <h3>Telegram Channel</h3>
+            <p>Stay updated with us</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>Boostivon</h4>
+            <p>Smarter social growth automation platform.</p>
+            <div class="social-icons">
+              <a href="#" aria-label="Twitter">𝕏</a>
+              <a href="#" aria-label="Instagram">📷</a>
+              <a href="#" aria-label="LinkedIn">💼</a>
+            </div>
+          </div>
+          
+          <div class="footer-section">
+            <h4>Product</h4>
+            <a href="#features">Features</a>
+            <a href="#services">Services</a>
+            <a href="{% url 'login' %}">Dashboard</a>
+          </div>
+          
+          <div class="footer-section">
+            <h4>Company</h4>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+            <a href="#">Blog</a>
+          </div>
+          
+          <div class="footer-section">
+            <h4>Legal</h4>
+            <a href="#">Terms of Service</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Cookie Policy</a>
+          </div>
+        </div>
+        
+        <div class="footer-bottom">
+          <p>&copy; 2026 Boostivon. All rights reserved.</p>
+          <p>Crafted with ❤️ for creators and businesses.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="{% static 'js/landing.js' %}"></script>
+  </body>
+</html>

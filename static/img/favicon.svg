@@ -1,0 +1,24 @@
+<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="faviconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#051edb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00b1fb;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="32" height="32" fill="#ffffff"/>
+  
+  <!-- Main icon -->
+  <g transform="translate(16, 16)">
+    <!-- Rocket -->
+    <path d="M 0 -6 L 2.5 1.5 L 0 3 L -2.5 1.5 Z" fill="url(#faviconGradient)"/>
+    
+    <!-- Flame -->
+    <path d="M -1 3 L -1.5 6 L 0 4.5 L 1.5 6 L 1 3 Z" fill="url(#faviconGradient)" opacity="0.8"/>
+    
+    <!-- Wing dots -->
+    <circle cx="-3" cy="0" r="1.2" fill="url(#faviconGradient)" opacity="0.6"/>
+    <circle cx="3" cy="0" r="1.2" fill="url(#faviconGradient)" opacity="0.6"/>
+  </g>
+</svg>
