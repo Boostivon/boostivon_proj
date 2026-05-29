@@ -501,10 +501,10 @@ def fund_account(request):
                 return redirect('initialize_payment', str(amount))
             else:
                 messages.error(request, "Amount must not be less than ₦1000")
-                return redirect('fund_account')
+                return redirect('fund_wallet')
         else:
             messages.error(request, "Enter an amount")
-            return redirect('fund_account')
+            return redirect('fund_wallet')
     
     return render(request, 'accounts/fund_account.html')
 
@@ -539,10 +539,10 @@ def initialize_payment(request, amount):
             return redirect(payment_link)
         else:
             messages.error(request, "Failed to initialize payment. Please try again.")
-            return redirect('fund_account')
+            return redirect('fund_wallet')
     except requests.RequestException:
         messages.error(request, "An error occurred while connecting to the payment gateway. Please try again.")
-        return redirect('fund_account')
+        return redirect('fund_wallet')
     
 def payment_callback(request):
     status = request.GET.get('status')
