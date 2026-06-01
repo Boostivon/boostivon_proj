@@ -110,12 +110,12 @@ class Platform(models.Model):
     
     # calculate quantity of platform based on number of social media accounts available for that platform
     def save(self, *args, **kwargs):
-        if self.pk is None:
+        # Always set `quantity` to the number of unassigned SocialMediaAccount records
+        try:
+            self.quantity = self.accounts_count()
+        except Exception:
+            # If something goes wrong (e.g., during initial migration), default to 0
             self.quantity = 0
-            super().save(*args, **kwargs)
-            return
-
-        self.quantity = self.accounts_count()
         super().save(*args, **kwargs)
         
     

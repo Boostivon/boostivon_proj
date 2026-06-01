@@ -45,7 +45,7 @@ def home(request):
     completed_orders_count = orders.filter(status='completed').count() if orders else 0
     tts_jobs_count = TextToSpeechRequest.objects.filter(user=request.user).count() if request.user.is_authenticated else 0
     
-    products = Platform.objects.all().order_by('-created_at')[:10] # Get the first 10 products for display
+    products = Platform.objects.filter(quantity__gt=0).order_by('-created_at')[:10] # Get the first 10 products for display
     
     context = {
         'orders': orders,

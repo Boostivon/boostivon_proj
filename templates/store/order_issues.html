@@ -11,12 +11,12 @@
 
   <!-- Filter Form -->
   <div class="card pad" style="margin-bottom: 1rem;">
-    <form method="get" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end;">
-      <div style="flex: 1; min-width: 200px;">
+    <form method="get" class="filter-form">
+      <div class="filter-field">
         <label for="order_id" style="display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.25rem;">Order ID</label>
         <input type="number" id="order_id" name="order_id" class="input" placeholder="Filter by order ID" value="{{ filter_order_id }}" style="width: 100%;">
       </div>
-      <div style="flex: 1; min-width: 200px;">
+      <div class="filter-field">
         <label for="status" style="display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.25rem;">Provider Status</label>
         <select id="status" name="status" class="input" style="width: 100%;">
           <option value="">All Statuses</option>
@@ -25,10 +25,58 @@
           {% endfor %}
         </select>
       </div>
-      <button type="submit" class="btn btn-primary">Filter</button>
-      <a href="{% url 'store:order_issues' %}" class="btn btn-outline">Clear</a>
+      <div class="filter-actions">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{% url 'store:order_issues' %}" class="btn btn-outline">Clear</a>
+      </div>
     </form>
   </div>
+
+  <style>
+    .filter-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .filter-field {
+      min-width: 0;
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .filter-form {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-actions {
+        grid-column: 1 / -1;
+      }
+
+      .filter-actions .btn {
+        flex: 1;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .filter-form {
+        grid-template-columns: 1fr;
+      }
+
+      .table tbody td:nth-child(n+6) {
+        display: none;
+      }
+
+      .table thead th:nth-child(n+6) {
+        display: none;
+      }
+    }
+  </style>
 
   {% if issues %}
     <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Found {{ page_obj.paginator.count }} issue(s) — Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>

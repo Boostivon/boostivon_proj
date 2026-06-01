@@ -20,7 +20,8 @@ from store.views import (
     initialize_product_purchase,
     my_accounts,
     admin_order_issues,
-    admin_order_detail
+    admin_order_detail,
+    edit_service
 )
 
 app_name = 'store'
@@ -41,6 +42,7 @@ urlpatterns = [
     path('edit-platform/<int:platform_id>/', edit_platform, name='edit_platform'),
     path('delete-platform/<int:platform_id>/', delete_platform, name='delete_platform'),
     path('view-platform/<int:platform_id>/', view_platform, name='view_platform'),
+    path('edit-service/<int:service_id>/', edit_service, name='edit_service'),
     path('purchase/', purchase, name='purchase'),
     path('purchase/initialize/<uuid:order_id>/', initialize_product_purchase, name='initialize_product_purchase'),
     path('my-accounts/', my_accounts, name='my_accounts'),

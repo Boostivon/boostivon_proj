@@ -28,11 +28,25 @@ class SocialMediaAccountForm(forms.ModelForm):
 class PlatformForm(forms.ModelForm):
     class Meta:
         model = Platform
-        fields = ['name', 'price', 'quantity', 'description']
+        fields = ['name', 'price', 'description']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'input'}),
             'price': forms.NumberInput(attrs={'class': 'input'}),
-            'quantity': forms.NumberInput(attrs={'class': 'input'}),
             'description': forms.Textarea(attrs={'class': 'input'}),
+        }
+
+
+class ServiceForm(forms.ModelForm):
+    class Meta:
+        model = Service
+        fields = ['name', 'description', 'category', 'provider_service_id', 'price_per_k', 'is_active', 'min', 'max']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'input'}),
+            'description': forms.Textarea(attrs={'class': 'input', 'rows': 4}),
+            'category': forms.TextInput(attrs={'class': 'input'}),
+            'provider_service_id': forms.TextInput(attrs={'class': 'input'}),
+            'price_per_k': forms.NumberInput(attrs={'class': 'input'}),
+            'min': forms.NumberInput(attrs={'class': 'input'}),
+            'max': forms.NumberInput(attrs={'class': 'input'}),
         }
         

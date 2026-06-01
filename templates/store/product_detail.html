@@ -12,7 +12,7 @@
             <h2 style="margin:0.25rem 0">{{ product.platform.name }}</h2>
             <div class="muted">Account Info</div>
             <h3 style="margin:0.25rem 0">{{ product.logs|default:"No account notes" }}</h3>
-            <p class="muted" style="margin-top: 0.5rem;">{{ product.platform.description|default:"No additional details provided." }}</p>
+            <p class="muted truncated-desc" data-fulltext="{{ product.platform.description|linebreaks|striptags }}" style="margin-top: 0.5rem; font-size:0.9rem; white-space: pre-line;">{{ product.platform.description|default:"No additional details provided."|truncatechars:150 }}</p>
 
             <div style="margin-top: 1rem; display:flex; gap:0.6rem; align-items:center;">
                 {% comment %} <a class="btn btn-primary" href="#">Buy Now — ₦{{ product.platform.price|floatformat:2 }}</a> {% endcomment %}
@@ -36,4 +36,24 @@
             </div>
         </div>
     </div>
+        <script>
+            document.addEventListener('click', function(e){
+                if(e.target && e.target.classList.contains('see-more')){
+                    const p = e.target.previousElementSibling;
+                    if(!p) return;
+                    p.textContent = p.getAttribute('data-fulltext');
+                    e.target.remove();
+                }
+            });
+            document.querySelectorAll('.truncated-desc').forEach(function(p){
+                const full = p.getAttribute('data-fulltext') || '';
+                if(full && full.length > 150){
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'see-more btn btn-sm btn-link';
+                    btn.textContent = 'See more';
+                    p.after(btn);
+                }
+            });
+        </script>
 {% endblock content %}

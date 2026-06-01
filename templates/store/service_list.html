@@ -1,11 +1,44 @@
-{% extends "partials/base.html" %} {% load static %}
-{% block title %}
-Services
-{% endblock title %}
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Services{% endblock title %}
 {% block content %}
 <div class="page-header">
   <h1>Services</h1>
-  <p>Welcome to the Services page!</p>
+  <p>Manage available services.</p>
 </div>
 <div style="height: 20px;"></div>
-{% endblock content %}  
+
+{% if services %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Platform</th>
+          <th class="text-right">Price / 1K</th>
+          <th class="text-right">Min / Max</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for service in services %}
+          <tr>
+            <td>{{ service.name }}</td>
+            <td>{{ service.category|default:"—" }}</td>
+            <td class="text-right">₦{{ service.price_per_k|default:0 }}</td>
+            <td class="text-right">{{ service.min }} / {{ service.max }}</td>
+            <td class="actions">
+              {% if request.user.role == 'admin' %}
+                <a href="{% url 'store:edit_service' service.id %}" class="btn btn-sm btn-outline">Edit</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="empty">No services yet.</div>
+{% endif %}
+
+{% endblock content %}

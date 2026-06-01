@@ -15,11 +15,9 @@
               <div class="muted" style="font-size:0.82rem;">Platform</div>
               <h3 style="margin: 0.25rem 0;">{{ product.platform.name }}</h3>
               <div class="muted">{{ product.logs|default:"No account notes"|truncatechars:40 }}</div>
-              <p class="muted" style="margin-top: 0.6rem; font-size: 0.92rem;">{{ product.platform.description|default:"No description" }}</p>
+              <p class="muted truncated-desc" data-fulltext="{{ product.platform.description|linebreaks|striptags }}" style="margin-top: 0.6rem; font-size: 0.85rem; white-space: pre-line;">{{ product.platform.description|default:"No description"|truncatechars:80 }}</p>
             </div>
             <div style="text-align: right;">
-              <div class="stat-title">Price</div>
-              <div class="stat-value">₦{{ product.price|floatformat:2 }}</div>
               <div style="height: 12px"></div>
               <a href="{% url 'store:product_detail' product.id %}" class="btn btn-outline">View</a>
             </div>
@@ -37,4 +35,26 @@
   {% else %}
     <div class="empty" style="margin-top: 1rem;">No products available yet.</div>
   {% endif %}
+  
+  <script>
+    document.addEventListener('click', function(e){
+      if(e.target && e.target.classList.contains('see-more')){
+        const p = e.target.previousElementSibling;
+        if(!p) return;
+        p.textContent = p.getAttribute('data-fulltext');
+        e.target.remove();
+      }
+    });
+    // Insert see more links for truncated descriptions
+    document.querySelectorAll('.truncated-desc').forEach(function(p){
+      const full = p.getAttribute('data-fulltext') || '';
+      if(full && full.length > 80){
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'see-more btn btn-sm btn-link';
+        btn.textContent = 'See more';
+        p.after(btn);
+      }
+    });
+  </script>
 {% endblock content %}

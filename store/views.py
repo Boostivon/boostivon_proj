@@ -7,7 +7,7 @@ from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .forms import CreateOrderForm, PlatformForm, SocialMediaAccountForm
+from .forms import CreateOrderForm, PlatformForm, SocialMediaAccountForm, ServiceForm
 from .models import Platform, Service, Order, SocialMediaAccount, AccountOrder, UserPlatformAccount
 from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
@@ -16,7 +16,31 @@ from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def service_list(request):
-    return render(request, "store/service_list.html")
+    # Show list of services and allow admin to edit
+    services = Service.objects.all().order_by('-created_at')
+    return render(request, "store/service_list.html", {'services': services})
+
+
+@login_required(login_url='login')
+def edit_service(request, service_id):
+    if request.user.role != 'admin':
+        return redirect('home')
+
+    service = get_object_or_404(Service, id=service_id)
+    form = ServiceForm(instance=service)
+
+    if request.method == 'POST':
+        form = ServiceForm(request.POST, instance=service)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Service updated successfully.')
+            return redirect('store:service_list')
+        else:
+            error = next(iter(form.errors.values()))[0]
+            messages.error(request, error)
+            return redirect('store:edit_service', service_id=service_id)
+
+    return render(request, 'store/edit-service.html', {'form': form, 'service': service})
 
 @login_required(login_url='login')
 def create_order(request):
@@ -92,8 +116,17 @@ def assign_accounts_to_user(user, platform, quantity, account_order):
             account=account,
             account_order=account_order
         )
+        # mark account as assigned so it's not available anymore
+        account.is_assigned = True
+        account.save()
         assigned_count += 1
     
+    # recalculate platform quantity
+    try:
+        platform.save()
+    except Exception:
+        pass
+
     return assigned_count
 
 
@@ -265,6 +298,9 @@ def product_list(request):
 
 @login_required(login_url='login')
 def product_detail(request, product_id):
+    if request.user.role != 'admin':
+        messages.error(request, 'You do not have permission to view this page.')
+        return redirect('home')
     product = get_object_or_404(SocialMediaAccount, id=product_id)
     return render(request, 'store/product_detail.html', {'product': product})
 

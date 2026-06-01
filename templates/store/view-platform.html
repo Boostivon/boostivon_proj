@@ -16,7 +16,7 @@ View Platform
 <div style="height: 12px"></div>
 <div class="card pad">
   <div class="stat-title">Description</div>
-  <div class="stat-value">{{ platform.description }}</div>
+  <div class="stat-value"><p class="truncated-desc" data-fulltext="{{ platform.description|linebreaks|striptags }}" style="margin:0; font-size:0.92rem; white-space: pre-line;">{{ platform.description|truncatechars:250 }}</p></div>
 </div>
 <div style="height: 12px"></div>
 <div class="card pad">
@@ -66,6 +66,25 @@ View Platform
 </div>
 
 <script>
+  // see more for platform description
+  document.addEventListener('click', function(e){
+    if(e.target && e.target.classList.contains('see-more')){
+      const p = e.target.previousElementSibling;
+      if(!p) return;
+      p.textContent = p.getAttribute('data-fulltext');
+      e.target.remove();
+    }
+  });
+  document.querySelectorAll('.truncated-desc').forEach(function(p){
+    const full = p.getAttribute('data-fulltext') || '';
+    if(full && full.length > 250){
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'see-more btn btn-sm btn-link';
+      btn.textContent = 'See more';
+      p.after(btn);
+    }
+  });
   const maxQuantity = {{ platform.quantity }};
   const pricePerAccount = {{ platform.price }};
   

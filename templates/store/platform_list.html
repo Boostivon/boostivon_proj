@@ -21,7 +21,7 @@
         <th>Platform</th>
         {% comment %} <th>Username</th> {% endcomment %}
         <th class="text-right">Price</th>
-        <th>Description</th>
+        {% comment %} <th>Description</th> {% endcomment %}
         <th class="text-right">Date Added</th>
         <th></th>
       </tr>
@@ -33,7 +33,9 @@
             <td>{{ product.name|title }}</td>
             {% comment %} <td>{{ product.username }}</td> {% endcomment %}
             <td class="text-right">₦{{ product.price|floatformat:2 }}</td>
-            <td>{{ product.description|default:"—" }}</td>
+            {% comment %} <td>
+              <span class="truncated-desc" data-fulltext="{{ product.description|escapejs }}" style="font-size:0.9rem; display:block;">{{ product.description|default:"—"|truncatechars:120 }}</span>
+            </td> {% endcomment %}
             <td class="text-right">{{ product.created_at|date:'M j, Y' }}</td>
             <td class="actions">
               {% if request.user.role == 'admin' %}
@@ -54,4 +56,25 @@
     </tbody>
   </table>
 </div>
+      <script>
+        document.addEventListener('click', function(e){
+          if(e.target && e.target.classList.contains('see-more')){
+            const p = e.target.previousElementSibling;
+            if(!p) return;
+            p.textContent = p.getAttribute('data-fulltext');
+            e.target.remove();
+          }
+        });
+        document.querySelectorAll('.truncated-desc').forEach(function(p){
+          const full = p.getAttribute('data-fulltext') || '';
+          if(full && full.length > 120){
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'see-more btn btn-sm btn-link';
+            btn.style.marginLeft = '0.5rem';
+            btn.textContent = 'See more';
+            p.after(btn);
+          }
+        });
+      </script>
 {% endblock content %}
