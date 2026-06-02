@@ -12,7 +12,7 @@
             <h2 style="margin:0.25rem 0">{{ product.platform.name }}</h2>
             <div class="muted">Account Info</div>
             <h3 style="margin:0.25rem 0">{{ product.logs|default:"No account notes" }}</h3>
-            <p class="muted truncated-desc" data-fulltext="{{ product.platform.description|linebreaks|striptags }}" style="margin-top: 0.5rem; font-size:0.9rem; white-space: pre-line;">{{ product.platform.description|default:"No additional details provided."|truncatechars:150 }}</p>
+            <p class="muted truncated-desc" data-fulltext="{{ product.platform.description|linebreaks|striptags|urlize }}" style="margin-top: 0.5rem; font-size:0.9rem; white-space: pre-line;">{{ product.platform.description|default:"No additional details provided."|truncatechars:150 }}</p>
             <div class="full-html" style="display:none">{{ product.platform.description|default:""|urlize|linebreaks }}</div>
 
             <div style="margin-top: 1rem; display:flex; gap:0.6rem; align-items:center;">

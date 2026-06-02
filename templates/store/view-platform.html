@@ -18,7 +18,7 @@ Platform {% endblock title %} {% block content %}
       data-fulltext="{{ platform.description|linebreaks|striptags }}"
       style="margin: 0; font-size: 0.92rem; white-space: pre-line"
     >
-      {{ platform.description|truncatechars:250 }}
+      {{ platform.description|urlize|truncatechars:250 }}
     </p>
     <div class="full-html" style="display:none">{{ platform.description|default:""|urlize|linebreaks }}</div>
   </div>
@@ -111,9 +111,9 @@ Platform {% endblock title %} {% block content %}
 <!--Disclaimer -->
 <div class="alert alert-info">
   <p>
-    <strong>Disclaimer:</strong> By purchasing any product, you agree that you
+    <strong>Disclaimer:</strong> By purchasing any product, you agree that you      
     are fully aware of these terms/conditions and agree to follow them! <a href="{% url 'store:terms_and_conditions' %}" target="_blank">👉🏽 TERMS AND CONDITIONS</a>
-  </p>
+  </p>  
 </div>
 <script>
   // see more for platform description
