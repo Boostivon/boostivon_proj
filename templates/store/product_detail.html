@@ -13,10 +13,13 @@
             <div class="muted">Account Info</div>
             <h3 style="margin:0.25rem 0">{{ product.logs|default:"No account notes" }}</h3>
             <p class="muted truncated-desc" data-fulltext="{{ product.platform.description|linebreaks|striptags }}" style="margin-top: 0.5rem; font-size:0.9rem; white-space: pre-line;">{{ product.platform.description|default:"No additional details provided."|truncatechars:150 }}</p>
+            <div class="full-html" style="display:none">{{ product.platform.description|default:""|urlize|linebreaks }}</div>
 
             <div style="margin-top: 1rem; display:flex; gap:0.6rem; align-items:center;">
                 {% comment %} <a class="btn btn-primary" href="#">Buy Now — ₦{{ product.platform.price|floatformat:2 }}</a> {% endcomment %}
                 <a class="btn btn-outline" href="{{ product.link }}" target="_blank" rel="noopener">View Profile</a>
+                <a href="{% url "store:edit_product" product.id %}" class="btn btn-outline">Edit</a>
+                <a href="{% url "store:delete_product" product.id %}" class="btn btn-outline">Delete</a>
             </div>
         </div>
 
@@ -41,11 +44,17 @@
                 if(e.target && e.target.classList.contains('see-more')){
                     const p = e.target.previousElementSibling;
                     if(!p) return;
-                    p.textContent = p.getAttribute('data-fulltext');
+                    const hidden = e.target.nextElementSibling;
+                    if(hidden && hidden.classList && hidden.classList.contains('full-html')){
+                        p.innerHTML = hidden.innerHTML;
+                        hidden.remove();
+                    } else {
+                        p.textContent = p.getAttribute('data-fulltext');
+                    }
                     e.target.remove();
                 }
             });
-            document.querySelectorAll('.truncated-desc').forEach(function(p){
+                document.querySelectorAll('.truncated-desc').forEach(function(p){
                 const full = p.getAttribute('data-fulltext') || '';
                 if(full && full.length > 150){
                     const btn = document.createElement('button');

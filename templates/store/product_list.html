@@ -16,18 +16,21 @@
               <h3 style="margin: 0.25rem 0;">{{ product.platform.name }}</h3>
               <div class="muted">{{ product.logs|default:"No account notes"|truncatechars:40 }}</div>
               <p class="muted truncated-desc" data-fulltext="{{ product.platform.description|linebreaks|striptags }}" style="margin-top: 0.6rem; font-size: 0.85rem; white-space: pre-line;">{{ product.platform.description|default:"No description"|truncatechars:80 }}</p>
+              <div class="full-html" style="display:none">{{ product.platform.description|default:""|urlize|linebreaks }}</div>
             </div>
             <div style="text-align: right;">
               <div style="height: 12px"></div>
               <a href="{% url 'store:product_detail' product.id %}" class="btn btn-outline">View</a>
+              <a href="{% url "store:edit_product" product.id %}" class="btn btn-sm btn-outline">Edit</a>
+              <a href="{% url "store:delete_product" product.id %}" class="btn btn-sm btn-outline">Delete</a>
             </div>
           </div>
 
           <div style="margin-top: 0.85rem; display:flex; justify-content:space-between; align-items:center; gap: 0.5rem;">
             <div class="muted">Added {{ product.created_at|date:"M d, Y" }}</div>
-            <div class="actions">
+            {% comment %} <div class="actions">
               <a class="btn btn-primary" href="{% url 'store:product_detail' product.id %}">Buy Now</a>
-            </div>
+            </div> {% endcomment %}
           </div>
         </div>
       {% endfor %}
@@ -41,7 +44,13 @@
       if(e.target && e.target.classList.contains('see-more')){
         const p = e.target.previousElementSibling;
         if(!p) return;
-        p.textContent = p.getAttribute('data-fulltext');
+        const hidden = e.target.nextElementSibling;
+        if(hidden && hidden.classList && hidden.classList.contains('full-html')){
+          p.innerHTML = hidden.innerHTML;
+          hidden.remove();
+        } else {
+          p.textContent = p.getAttribute('data-fulltext');
+        }
         e.target.remove();
       }
     });

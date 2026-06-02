@@ -305,6 +305,37 @@ def product_detail(request, product_id):
     return render(request, 'store/product_detail.html', {'product': product})
 
 @login_required(login_url='login')
+def edit_product(request, product_id):
+    if request.user.role != 'admin':
+        return redirect('home')
+
+    product = get_object_or_404(SocialMediaAccount, id=product_id)
+    form = SocialMediaAccountForm(instance=product)
+
+    if request.method == 'POST':
+        form = SocialMediaAccountForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Product updated successfully.')
+            return redirect('store:product_list')
+        else:
+            error = next(iter(form.errors.values()))[0]
+            messages.error(request, error)
+            return redirect('store:edit_product', product_id=product_id)
+
+    return render(request, 'store/edit-product.html', {'form': form, 'product': product})
+
+@login_required(login_url='login')
+def delete_product(request, product_id):
+    if request.user.role != 'admin':
+        return redirect('home')
+
+    product = get_object_or_404(SocialMediaAccount, id=product_id)
+    product.delete()
+    messages.success(request, 'Product deleted successfully.')
+    return redirect('store:product_list')
+
+@login_required(login_url='login')
 def my_accounts(request):
     """Display accounts purchased by the user"""
     user_accounts = UserPlatformAccount.objects.filter(user=request.user).select_related('account', 'account_order')
@@ -396,3 +427,6 @@ def admin_order_detail(request, order_id):
         return redirect('home')
 
     return render(request, 'store/admin_order_detail.html', {'order': order})
+
+def terms_and_conditions(request):
+    return render(request, 'store/terms-and-conditions.html')

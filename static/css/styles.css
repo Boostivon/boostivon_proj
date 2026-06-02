@@ -1105,3 +1105,14 @@ a {
 .email-btn:hover{
   filter: brightness(0.95);
 }
+.alert {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  color: var(--danger);
+}
+.alert.alert-info{
+  background: color-mix(in srgb, #2563eb 10%, transparent);
+  color: #2563eb;
+}
