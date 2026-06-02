@@ -31,6 +31,15 @@ def custom_404_view(request, exception):
 def custom_500_view(request):
     return render(request, 'accounts/500.html', status=500)
 
+def custom_400_view(request, exception=None):
+    return render(request, 'accounts/400.html', status=400)
+
+def custom_502_view(request):
+    return render(request, 'accounts/502.html', status=502)
+
+def custom_503_view(request):
+    return render(request, 'accounts/503.html', status=503)
+
 def landing(request):
     return render(request, 'landing.html')
 

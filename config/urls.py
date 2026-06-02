@@ -23,6 +23,9 @@ from django.conf.urls.static import static
 # handle 404
 handler404 = 'accounts.views.custom_404_view'
 handler500 = 'accounts.views.custom_500_view'
+handler502 = 'accounts.views.custom_502_view'
+handler503 = 'accounts.views.custom_503_view'
+handler400 = 'accounts.views.custom_400_view'
 
 urlpatterns = [
     path('restricted-admin/', admin.site.urls),
