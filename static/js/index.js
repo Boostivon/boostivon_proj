@@ -15,6 +15,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
+
 $(document).ready(function() {
     const Toast = Swal.mixin({
         toast: true,

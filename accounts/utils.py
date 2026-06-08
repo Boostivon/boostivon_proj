@@ -2,10 +2,14 @@
 from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
+
+from django.http import JsonResponse
+import requests
 from .models import EmailVerification, PasswordReset
 import resend
 
 resend.api_key = settings.RESEND_API_KEY
+SMVAULT_API_KEY = settings.SMVAULT_API_KEY
 
 def send_verification_code(user, verification_code):
     """
@@ -129,4 +133,47 @@ Boostivon
     except Exception as e:
         print(f"Failed to send password reset email to {user.email}: {str(e)}")
         return False
+
+def list_platforms():
+        url = f"https://smvaults.com/api/products.php?api_key={SMVAULT_API_KEY}"
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            products = response.json()["categories"]
+            return products
+        except requests.RequestException as e:
+            print(f"Failed to fetch products from SMVault: {str(e)}")
+            return []
+        
+def get_platform_products(platform_id):
+    url = f"https://smvaults.com/api/product.php?api_key={SMVAULT_API_KEY}&product={platform_id}"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        product = response.json()
+        return product['product']
+    except requests.RequestException as e:
+        return (f"Failed to fetch products for platform {platform_id} from SMVault: {str(e)}")
+
+def buy_product():
+    ...
+def convert_price_to_naira(price_in_dollars):
+    url = f"https://api.fastforex.io/convert?from=USD&to=NGN&amount={price_in_dollars}&api_key={settings.CURRENCY_CONVERSION_API_KEY}"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        exchange_rate = data['result']['NGN']
+        return exchange_rate
+    except Exception as e:
+        print(f"Error converting price: {str(e)}")
+        return 1  # Fallback to 1 if conversion fails
     
+def price(x):
+    if x < 10000:
+        x += x
+    else:
+        y = x * 50/100
+        x += y
+    
+    return x

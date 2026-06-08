@@ -1,5 +1,6 @@
 {% extends "partials/base.html" %} {% load static %} {% block title %} View
 Platform {% endblock title %} {% block content %}
+{% if platform %}
 <div class="page-header">
   <h1>{{ platform.name }}</h1>
   <p>Platform details and management</p>
@@ -107,6 +108,116 @@ Platform {% endblock title %} {% block content %}
     </div>
   </form>
 </div>
+{% elif sm_platform %}
+<div class="page-header">
+  <h1>{{ sm_platform.name }}</h1>
+  <p>Platform details and management</p>
+</div>
+<div style="height: 12px"></div>
+<div class="card pad">
+  <div class="stat-title">Platform Name</div>
+  <div class="stat-value">{{ sm_platform.name }}</div>
+</div>
+<div style="height: 12px"></div>
+<div class="card pad">
+  <div class="stat-title">Description</div>
+  <div class="stat-value">
+    <p
+      class="truncated-desc"
+      data-fulltext="{{ sm_platform.description|linebreaks|striptags }}"
+      style="margin: 0; font-size: 0.92rem; white-space: pre-line"
+    >
+      {{ sm_platform.description|urlize|truncatechars:250 }}
+    </p>
+    <div class="full-html" style="display:none">{{ sm_platform.description|default:""|urlize|linebreaks }}</div>
+  </div>
+</div>
+<div style="height: 12px"></div>
+<div class="card pad">
+  <div class="stat-title">Price per Account</div>
+  <div class="stat-value price" data-price="{{ sm_platform.price }}" data-currency="ngn">₦{{ sm_platform.price|floatformat:2 }}</div>
+</div>
+<div style="height: 12px"></div>
+<div class="card pad">
+  <div class="stat-title">Max Quantity</div>
+  <div class="stat-value">{{ sm_platform.max }}</div>
+</div>
+<div style="height: 12px"></div>
+{% comment %} <div class="card pad">
+  <div class="stat-title">Date Added</div>
+  <div class="stat-value">{{ sm_platform.created_at|date:"M d, Y" }}</div>
+</div> {% endcomment %}
+<div style="height: 12px"></div>
+{% if request.user.role == 'admin' %}
+<a href="{% url 'store:edit_platform' sm_platform.id %}" class="btn"
+  >Edit Platform</a
+>
+<a href="{% url 'store:delete_platform' sm_platform.id %}" class="btn btn-danger"
+  >Delete Platform</a
+>
+{% endif %} {% comment %} {% if request.user.role != 'admin' %} {% endcomment %}
+<div class="card pad" style="margin-top: 2rem">
+  <h3>Purchase {{ sm_platform.name }} Accounts</h3>
+  <form id="purchase-form" method="POST" action="{% url 'store:purchase' %}">
+    {% csrf_token %}
+    <div class="form-stack">
+      <div class="field">
+        <label for="quantity">Number of Accounts</label>
+        <div style="display: flex; align-items: center; gap: 0.5rem">
+          <button
+            type="button"
+            class="minus-btn btn btn-sm btn-outline"
+            onclick="decreaseQuantity()"
+          >
+            −
+          </button>
+          <input
+            type="number"
+            id="quantity"
+            name="quantity"
+            value="1"
+            min="1"
+            max="{{ sm_platform.quantity }}"
+            class="input"
+            style="width: 100px; text-align: center"
+            readonly
+          />
+          <button
+            type="button"
+            class="plus-btn btn btn-sm btn-outline"
+            onclick="increaseQuantity()"
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Total Price</label>
+        <div class="stat-value" id="total-price">
+          ₦{{ sm_platform.price|floatformat:2 }}
+        </div>
+      </div>
+      <input type="hidden" name="platform_id" value="{{ sm_platform.id }}" />
+      <button
+        type="submit"
+        class="btn btn-primary"
+        id="purchase-btn"
+        {%
+        if
+        sm_platform.quantity=""
+        ="0"
+        %}disabled{%
+        endif
+        %}
+      >
+        {% if sm_platform.quantity == 0 %}No Accounts Available{% else %}Purchase
+        Now{% endif %}
+      </button>
+    </div>
+  </form>
+</div>
+{% endif %}
 
 <!--Disclaimer -->
 <div class="alert alert-info">
@@ -179,4 +290,4 @@ Platform {% endblock title %} {% block content %}
     this.submit();
   });
 </script>
-{% comment %} {% endif %} {% endcomment %} {% endblock content %}
+{% endblock content %}

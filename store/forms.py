@@ -28,8 +28,9 @@ class SocialMediaAccountForm(forms.ModelForm):
 class PlatformForm(forms.ModelForm):
     class Meta:
         model = Platform
-        fields = ['name', 'price', 'description']
+        fields = ['name', 'price', 'description', 'icon']
         widgets = {
+            'icon': forms.ClearableFileInput(attrs={'class': 'input'}),
             'name': forms.TextInput(attrs={'class': 'input'}),
             'price': forms.NumberInput(attrs={'class': 'input'}),
             'description': forms.Textarea(attrs={'class': 'input'}),

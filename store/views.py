@@ -2,6 +2,7 @@ import json
 import uuid
 from decimal import Decimal
 
+from accounts.utils import get_platform_products, list_platforms
 import requests
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
@@ -19,7 +20,6 @@ def service_list(request):
     # Show list of services and allow admin to edit
     services = Service.objects.all().order_by('-created_at')
     return render(request, "store/service_list.html", {'services': services})
-
 
 @login_required(login_url='login')
 def edit_service(request, service_id):
@@ -61,8 +61,10 @@ def create_order(request):
             messages.error(request, error)
             return redirect('store:create_order')
     else:
+        
         form = CreateOrderForm()
-    return render(request, "store/order-new.html", {"form": form})
+        
+    return render(request, "store/order-new-copy.html", {"form": form})
 
 @login_required(login_url='login')
 def initialize_payment(request, order_id):
@@ -248,8 +250,17 @@ def add_platform(request):
 
 @login_required(login_url='login')
 def view_platform(request, platform_id):
-    platform = get_object_or_404(Platform, id=platform_id)
-    return render(request, 'store/view-platform.html', {'platform': platform})
+    platform = None
+    try:
+        platform = Platform.objects.get(id=platform_id)
+    except Platform.DoesNotExist:
+        pass
+
+    sm_platform = get_platform_products(platform_id)
+    if isinstance(sm_platform, list) and sm_platform:
+        sm_platform = sm_platform[0]
+
+    return render(request, 'store/view-platform.html', {'platform': platform or None, 'sm_platform': sm_platform})
 
 @login_required(login_url='login')
 def edit_platform(request, platform_id):
@@ -286,7 +297,8 @@ def delete_platform(request, platform_id):
 def platform_list(request):
      
     platform = Platform.objects.all().order_by('-created_at')
-    return render(request, 'store/platform_list.html', {'products': platform})
+    sm_platforms = list_platforms()
+    return render(request, 'store/platform_list.html', {'products': platform, 'sm_platforms': sm_platforms})
 
 @login_required(login_url='login')
 def product_list(request):
@@ -359,30 +371,34 @@ def purchase(request):
         try:
             platform = Platform.objects.get(id=platform_id)
         except Platform.DoesNotExist:
+            sm_platform = get_platform_products(platform_id)
+        except Exception:
             messages.error(request, 'Platform not found')
             return redirect('store:platform_list')
-        
-        # Check if enough accounts are available
-        available_accounts = SocialMediaAccount.objects.filter(
-            platform=platform
-        ).exclude(
-            id__in=UserPlatformAccount.objects.values_list('account_id', flat=True)
-        ).count()
-        
-        if available_accounts < quantity:
-            messages.error(request, f'Only {available_accounts} accounts available for {platform.name}')
-            return redirect('store:view_platform', platform_id=platform.id)
-        
-        # Create the order
-        order = AccountOrder.objects.create(
-            user=request.user,
-            platform=platform,
-            quantity=quantity,
-            status='pending'
-        )
-        
-        # Redirect to payment initialization
-        return redirect('store:initialize_product_purchase', order_id=order.order_id)
+        if platform:
+            # Check if enough accounts are available
+            available_accounts = SocialMediaAccount.objects.filter(
+                platform=platform
+            ).exclude(
+                id__in=UserPlatformAccount.objects.values_list('account_id', flat=True)
+            ).count()
+            
+            if available_accounts < quantity:
+                messages.error(request, f'Only {available_accounts} accounts available for {platform.name}')
+                return redirect('store:view_platform', platform_id=platform.id)
+            
+            # Create the order
+            order = AccountOrder.objects.create(
+                user=request.user,
+                platform=platform,
+                quantity=quantity,
+                status='pending'
+            )
+            
+            # Redirect to payment initialization
+            return redirect('store:initialize_product_purchase', order_id=order.order_id)
+        elif sm_platform:
+            ...
     
     messages.error(request, 'Invalid request method')
     return redirect('store:platform_list')

@@ -30,4 +30,6 @@ urlpatterns = [
     path('fund-wallet/', views.fund_account, name='fund_wallet'),
     path('payment-callback/', views.payment_callback, name='payment_callback'),
     path('initialize-payment/<amount>/', views.initialize_payment, name='initialize_payment'),
+    
+    path('convert-price/', views.convert_price_to_naira_view, name='convert_price'),
 ]

@@ -7,9 +7,10 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from accounts.models import EmailVerification, PasswordReset
 import resend
+from store.forms import CreateOrderForm
 from store.models import Order, Platform, SocialMediaAccount, TextToSpeechRequest, Service, Transaction
 from store.views import orders
-from .utils import send_verification_code, send_password_reset_email
+from .utils import convert_price_to_naira, send_verification_code, send_password_reset_email, list_platforms
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db.models import Count, Q, Sum
@@ -49,18 +50,42 @@ def home(request):
     if not request.user.is_authenticated:
         return render(request, 'landing.html')
     
-    # Show dashboard to authenticated users
+        # Show dashboard to authenticated users
     orders = Order.objects.filter(user=request.user)
     completed_orders_count = orders.filter(status='completed').count() if orders else 0
     tts_jobs_count = TextToSpeechRequest.objects.filter(user=request.user).count() if request.user.is_authenticated else 0
     
     products = Platform.objects.filter(quantity__gt=0).order_by('-created_at')[:10] # Get the first 10 products for display
+    sm_products = list_platforms()  # Fetch products from SMVault API
+    
+    if request.method == 'POST':
+        if request.user.email_verified == False:
+            messages.error(request, 'Please verify your email before placing an order.')
+            return redirect('verification_view')
+        form = CreateOrderForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.total_price = (order.service.price_per_k or Decimal('0.00')) * order.quantity / Decimal('1000')
+            order.user = request.user  # Set the user based on the logged-in user
+            order.status = 'pending'
+            order.save()
+            return redirect('store:initialize_payment', order.id)
+        else:
+            error = next(iter(form.errors.values()))[0]
+            messages.error(request, error)
+            return redirect('store:create_order')
+    else:
+        form = CreateOrderForm()
+    
+
     
     context = {
         'orders': orders,
         'completed_orders_count': completed_orders_count,
         'tts_jobs_count': tts_jobs_count,
         'products': products,
+        'sm_products': sm_products,
+        'form': form,
     }
     
     return render(request, 'accounts/dashboard.html', context)
@@ -553,7 +578,7 @@ def initialize_payment(request, amount):
         messages.error(request, "An error occurred while connecting to the payment gateway. Please try again.")
         return redirect('fund_wallet')
     
-def payment_callback(request):
+def payment_callback(request):      
     status = request.GET.get('status')
     tx_ref = request.GET.get('tx_ref')
     transaction_id = request.GET.get('transaction_id')
@@ -595,3 +620,17 @@ def payment_callback(request):
     
     
         
+
+# =========================== Currency conversion utility ============================
+def convert_price_to_naira_view(request):
+    amount = request.GET.get('amount')
+    if amount is None:
+        return JsonResponse({'error': 'Missing amount parameter.'}, status=400)
+
+    try:
+        price_in_dollars = float(amount)
+    except ValueError:
+        return JsonResponse({'error': 'Invalid amount parameter.'}, status=400)
+
+    convert = convert_price_to_naira(price_in_dollars)
+    return JsonResponse({'price_in_naira': convert})

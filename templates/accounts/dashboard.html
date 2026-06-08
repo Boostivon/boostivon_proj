@@ -1,4 +1,4 @@
-{% extends "partials/base.html" %} {% load static %}
+{% extends "partials/base.html" %} {% load static %} {% load humanize %}
 {% block title %}
 Dashboard
 {% endblock title %}
@@ -66,33 +66,58 @@ Dashboard
   <table class="table">
     <thead>
       <tr>
+        <th>Icon</th>
         <th>Platform</th>
-        <th>Quantity</th>
+        {% comment %} <th>Quantity</th> {% endcomment %}
         <th>Price</th>
         
       </tr>
     </thead>
     <tbody>
+      {% if not products and not sm_products %}
+        <tr>
+          <td colspan="4" class="text-center">No products found.</td>
+        </tr>
+      {% endif %}
       {% for product in products %}
         <tr>
-          <td>{{ product.name|title }}</td>
-          <td>
-            {{ product.quantity }}Pcs
+  
+            <td>
+            <img src="{{ product.icon }}" alt="Product Icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;" alt="Icon">
           </td>
-          <td class="text-right">₦{{ product.price|floatformat:2 }} Each</td>
+          <td>{{ product.name|title }}</td>
+          <td class="text-right">
+            ₦{{ product.price|floatformat:2 }} Each
+          </td>
           <td>
             <a class="btn btn-sm" href="{% url 'store:view_platform' product.id %}">
               <i class="bi bi-eye"></i>
             </a>
           </td>
         </tr>
-      {% empty %}
+      {% endfor %}
+      {% for cat in sm_products %}
+        {% for product in cat.products %}
         <tr>
-          <td colspan="4" class="text-center">No products found.</td>
+          <td>
+            <img src="{{ cat.icon }}" alt="Product Icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;" alt="Icon">
+          </td>
+          <td>{{ product.name|title }}</td>
+          {% comment %} <td>
+            {{ product.quantity }}Pcs
+          </td> {% endcomment %}
+          <td class="text-right price" data-price="{{ product.price }}" data-id="{{ product.id }}" data-currency="ngn">Loading…</td>
+          <td>
+            <a class="btn btn-sm" href="{% url 'store:view_platform' product.id %}">
+              <i class="bi bi-eye"></i>
+            </a>
+          </td>
         </tr>
+        {% endfor %}
       {% endfor %}
     </tbody>
   </table>
   {% comment %} <a href="{% url "stor" %}"></a> {% endcomment %}
 </div>
+{% include "store/order-new.html" %}
 {% endblock content %}

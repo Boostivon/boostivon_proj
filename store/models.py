@@ -96,6 +96,7 @@ class TextToSpeechRequest(models.Model):
     
 # model for social media accounts
 class Platform(models.Model):
+    icon = models.ImageField(upload_to='platform_icons/', blank=True, null=True)
     name = models.CharField(max_length=50, unique=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     description = models.TextField(blank=True)

@@ -18,25 +18,32 @@
   <table class="table">
     <thead>
       <tr>
+        <th>Icon</th>
         <th>Platform</th>
         {% comment %} <th>Username</th> {% endcomment %}
         <th class="text-right">Price</th>
-        {% comment %} <th>Description</th> {% endcomment %}
-        <th class="text-right">Date Added</th>
+        {% comment %} <th class="text-right">Date Added</th> {% endcomment %}
         <th></th>
       </tr>
     </thead>
     <tbody>
-      {% if products %}
+      {% if not products and not sm_platforms %}
+        <tr>
+          <td colspan="5" class="text-center">No platforms found.</td>
+        </tr>
+      {% endif %}
         {% for product in products %}
           <tr>
+            <td>
+              <img src="{{ product.icon }}" alt="Product Icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;" >
+            </td>
             <td>{{ product.name|title }}</td>
             {% comment %} <td>{{ product.username }}</td> {% endcomment %}
             <td class="text-right">₦{{ product.price|floatformat:2 }}</td>
             {% comment %} <td>
               <span class="truncated-desc" data-fulltext="{{ product.description|escapejs }}" style="font-size:0.9rem; display:block;">{{ product.description|default:"—"|truncatechars:120 }}</span>
             </td> {% endcomment %}
-            <td class="text-right">{{ product.created_at|date:'M j, Y' }}</td>
+            {% comment %} <td class="text-right">{{ product.created_at|date:'M j, Y' }}</td> {% endcomment %}
             <td class="actions">
               {% if request.user.role == 'admin' %}
               <span>
@@ -54,11 +61,37 @@
             </td>
           </tr>
         {% endfor %}
-      {% else %}
-        <tr>
-          <td colspan="6" class="text-center">No products available.</td>
-        </tr>
-      {% endif %}
+        {% for cat in sm_platforms %}
+          {% for prod in cat.products %}
+          <tr>
+            <td>
+              <img src="{{ cat.icon }}" alt="Product Icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;" >
+            </td>
+            <td>{{ prod.name|title }}</td>
+            {% comment %} <td>{{ product.username }}</td> {% endcomment %}
+            <td class="text-right price" data-price="{{ prod.price }}">₦{{ prod.price|floatformat:2 }}</td>
+            {% comment %} <td>
+              <span class="truncated-desc" data-fulltext="{{ product.description|escapejs }}" style="font-size:0.9rem; display:block;">{{ product.description|default:"—"|truncatechars:120 }}</span>
+            </td> {% endcomment %}
+            {% comment %} <td class="text-right">{{ prod.created_at|date:'M j, Y' }}</td> {% endcomment %}
+            <td class="actions">
+              {% if request.user.role == 'admin' %}
+              <span>
+                <a href="{% url 'store:edit_platform' prod.id %}" class="btn btn-sm btn-outline"><i class="bi bi-pencil-square"></i></a>
+              </span>
+              <span>
+                <a href="{% url 'store:delete_platform' prod.id %}" class="btn btn-sm btn-outline"><i class="bi bi-trash"></i></a>
+              </span>
+              {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'store:view_platform' prod.id %}" class="btn btn-sm btn-outline">
+                  <i class="bi bi-eye"></i>
+                </a>
+            </td>
+          </tr>
+          {% endfor %}
+        {% endfor %}
     </tbody>
   </table>
 </div>
