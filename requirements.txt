@@ -9,7 +9,6 @@ gunicorn==26.0.0
 idna==3.16
 packaging==26.2
 pillow==12.2.0
-psycopg2==2.9.12
 psycopg2-binary==2.9.12
 python-dotenv==1.2.2
 requests==2.34.2
