@@ -13,6 +13,9 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fontawesome-iconpicker/3.2.0/css/fontawesome-iconpicker.css" integrity="sha512-9yS+ck0i78HGDRkAdx+DR+7htzTZJliEsxQOoslJyrDoyHvtoHmEv/Tbq8bEdvws7s1AVeCjCMOIwgZTGPhySw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fontawesome-iconpicker/3.2.0/js/fontawesome-iconpicker.min.js" integrity="sha512-7dlzSK4Ulfm85ypS8/ya0xLf3NpXiML3s6HTLu4qDq7WiJWtLLyrXb9putdP3/1umwTmzIvhuu9EW7gHYSVtCQ==" crossorgin="anonymous" reffererpolicy="no-refferer"></script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <script>
       (function(){
@@ -64,6 +67,7 @@
           <a class="nav-link {% if 'add-products' in request.path %}active{% endif %}" href="{% url "store:add_products" %}">Add Products</a>
           <a class="nav-link {% if 'services' in request.path %}active{% endif %}" href="{% url "store:service_list" %}">Services</a>
           <a class="nav-link {% if 'inbox' in request.path %}active{% endif %}" href="{% url "inbox" %}">Inbox</a>
+          <a class="nav-link {% if 'send-bulk-email' in request.path %}active{% endif %}" href="{% url "bulk_email_view" %}">Bulk Email</a>
           <a class="nav-link {% if 'order-issues' in request.path %}active{% endif %}" href="{% url 'store:order_issues' %}">Order Issues</a>
         {% endif %}
         <div class="sidebar-footer">

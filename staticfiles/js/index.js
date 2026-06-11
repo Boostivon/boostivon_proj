@@ -152,5 +152,55 @@ $(document).ready(function() {
             }
         });
     });
+
+    $('#send_bulk_email').on('click', function() {
+       const buttonel = $(this); 
+       const subject = $('input[name="subject"]').val();
+       const body = $('textarea[name="body"]').val();
+       let users = 0;
+       
+       $.ajax({
+            url: '/send-bulk-email/',
+            method: 'GET',
+            data: {
+                'subject':subject,
+                'body': body
+            },
+
+            beforeSend: function(){
+                buttonel.innerHTML = `Sending <i class="fa-solid fa-spinner"></i>`;
+            },
+
+            success: function(response) {
+                const form = $('.form-stack');
+                form.empty();
+
+                Toast.fire({
+                    icon:'success',
+                    title: response.message
+                });
+                
+                const success = `
+                    <div class="success-body">
+                        <div class="card">
+                            <div style="border-radius:200px; height:200px; width:200px; background: #F8FAF5; margin:0 auto;">
+                                <i class="checkmark">✓</i>
+                            </div>
+                                <h1>Success</h1> 
+                                <p>We received your purchase request;<br/> we'll be in touch shortly!</p>
+                        </div>
+                    </div>
+                `;
+
+                form.append(success);                
+            },
+            error: function(xhr, status,err){
+                Toast.fire({
+                    icon:'error',
+                    title: xhr.responseJSON.message
+                });
+            }
+       });
+    });
     
 });

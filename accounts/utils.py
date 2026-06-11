@@ -1,4 +1,5 @@
 """Utility functions for the accounts app."""
+from collections.abc import Iterable
 from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
@@ -206,11 +207,37 @@ def get_product(product_id):
     except requests.RequestException as e:
         return (f"Failed to fetch product {product_id} from SMVault: {str(e)}")
     
-def price(x):
-    if x < 10000:
-        x += x
-    else:
-        y = x * 50/100
-        x += y
-    
-    return x
+
+def bulk_email(user, email_subject, email_body):
+    """Send a bulk email to one or more users.
+
+    Accepts a single user object, an email string, or an iterable of users/email strings.
+    Returns True when the message is queued successfully, otherwise False.
+    """
+
+    subject = email_subject or 'Boostivon Update'
+    html_message = f"""
+    <html>
+      <body style="font-family:Arial,sans-serif;margin:20px;color:#1f2937;">
+        <div style="max-width:680px;margin:auto;padding:24px;border-radius:18px;background:#ffffff;box-shadow:0 20px 50px rgba(15,23,42,0.08);">
+          <h2 style="margin-bottom:0.5rem;color:#111827;">{subject}</h2>
+          <div style="margin-bottom:1.5rem;color:#475569;line-height:1.75;">{email_body}</div>
+          <hr style="border:none;border-top:1px solid rgba(148,163,184,0.18);margin:24px 0;" />
+          <p style="color:#64748b;font-size:0.9rem;">Boostivon • boostivon.com.ng</p>
+        </div>
+      </body>
+    </html>
+    """
+
+    try:
+        params: resend.Emails.SendParams = {
+            "from": f"Boostivon <{settings.DEFAULT_FROM_EMAIL}>",
+            "to": user,
+            "subject": subject,
+            "html": html_message,
+        }
+        resend.Emails.send(params)
+        return True
+    except Exception as e:
+        print(f"Failed to send bulk email to {user}: {str(e)}")
+        return False

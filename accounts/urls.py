@@ -26,6 +26,8 @@ urlpatterns = [
     path('inbox/', views.inbox, name='inbox'),
     path('inbox/<int:email_id>/', views.email_detail, name='email_detail'),
     path('webhooks/resend/', views.resend_webhook, name='resend_webhook'),
+    path('send-bulk-email/', views.bulk_email_func, name='bulk_email'),
+    path('bulk-email/', views.bulk_email_view, name='bulk_email_view'),
 
     path('fund-wallet/', views.fund_account, name='fund_wallet'),
     path('payment-callback/', views.payment_callback, name='payment_callback'),

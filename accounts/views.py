@@ -10,7 +10,7 @@ import resend
 from store.forms import CreateOrderForm
 from store.models import Order, Platform, SocialMediaAccount, TextToSpeechRequest, Service, Transaction
 from store.views import orders
-from .utils import convert_price_to_naira, send_verification_code, send_password_reset_email, list_platforms
+from .utils import bulk_email, convert_price_to_naira, send_verification_code, send_password_reset_email, list_platforms
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db.models import Count, Q, Sum
@@ -618,8 +618,40 @@ def payment_callback(request):
         messages.error(request, "Payment was not successful. Please try again.")
         return redirect('home')
     
-    
+@login_required(login_url='login')
+def bulk_email_func(request):
+    if request.user.role != 'admin':
+        return JsonResponse({'message': 'Only admins are allowed here'}, status=400)
         
+    subject = request.GET.get('subject')
+    body = request.GET.get('body')
+    s_users = 0
+    f_users = 0
+    
+    users = User.objects.all()
+    
+    if not subject and not body:
+        return JsonResponse({'message': 'Both fields are required!!'}, status=500)
+    else:
+        for user in users:        
+            email_sent = bulk_email(user.email, subject, body)
+            if email_sent:
+                s_users += 1
+            else:
+                f_users += 1
+        
+    return JsonResponse({'message': f'{s_users} Received, {f_users} Failed'})
+
+@login_required(login_url='login')
+def bulk_email_view(request):
+    if request.user.role != 'admin':
+        messages.warning(request, "Only admins are allowed here!!!")
+        return redirect('home')
+    return render(request, 'accounts/send_email.html')
+    
+    
+            
+    
 
 # =========================== Currency conversion utility ============================
 def convert_price_to_naira_view(request):
