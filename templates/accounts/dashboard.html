@@ -39,6 +39,7 @@ Dashboard
     <div class="stat-value">32</div>
   </div> {% endcomment %}
 </div>
+
 <div style="height: 12px"></div>
 <div class="quick-actions">
   <a
@@ -60,6 +61,9 @@ Dashboard
     >Generate TTS</a
   > {% endcomment %}
 </div>
+
+{% include "store/order-new.html" %}
+
 <div style="height: 12px"></div>
 {% comment %} display recent products {% endcomment %}
 <div class="table-wrap">
@@ -68,7 +72,7 @@ Dashboard
       <tr>
         <th>Icon</th>
         <th>Platform</th>
-        {% comment %} <th>Quantity</th> {% endcomment %}
+        <th>Quantity</th>
         <th>Price</th>
         
       </tr>
@@ -81,11 +85,13 @@ Dashboard
       {% endif %}
       {% for product in products %}
         <tr>
-  
             <td>
             <img src="{{ product.icon }}" alt="Product Icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;" alt="Icon">
           </td>
           <td>{{ product.name|title }}</td>
+          <td>
+            {{ product.quantity }}Pcs
+          </td>
           <td class="text-right">
             ₦{{ product.price|floatformat:2 }} Each
           </td>
@@ -103,9 +109,9 @@ Dashboard
             <img src="{{ cat.icon }}" alt="Product Icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;" alt="Icon">
           </td>
           <td>{{ product.name|title }}</td>
-          {% comment %} <td>
-            {{ product.quantity }}Pcs
-          </td> {% endcomment %}
+          <td>
+            {{ product.amount }}Pcs
+          </td>
           <td class="text-right price" data-price="{{ product.price }}" data-id="{{ product.id }}" data-currency="ngn">Loading…</td>
           <td>
             <a class="btn btn-sm" href="{% url 'store:view_platform' product.id %}">
@@ -119,5 +125,4 @@ Dashboard
   </table>
   {% comment %} <a href="{% url "stor" %}"></a> {% endcomment %}
 </div>
-{% include "store/order-new.html" %}
 {% endblock content %}

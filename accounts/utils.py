@@ -155,8 +155,35 @@ def get_platform_products(platform_id):
     except requests.RequestException as e:
         return (f"Failed to fetch products for platform {platform_id} from SMVault: {str(e)}")
 
-def buy_product():
-    ...
+def orders(order_id):
+    url = f"https://smvaults.com/api/order.php?api_key={SMVAULT_API_KEY}&order={order_id}"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        orders = response.json()
+        return orders
+    except requests.RequestException as e:
+        return {}
+def buy_product(product_id, amount, coupon=""):
+
+    API_KEY = SMVAULT_API_KEY 
+
+    payload = {
+        "action": "buyProduct",
+        "id": product_id,          # Product ID
+        "amount": amount,      # Quantity
+        "coupon": coupon,     # Discount code (leave empty if none)
+        "api_key": API_KEY
+    }
+
+    response = requests.post(
+        "https://smvaults.com/api/buy_product",
+        data=payload      # form-data
+    )
+
+    result = response.json()
+    return result
+   
 def convert_price_to_naira(price_in_dollars):
     url = f"https://api.fastforex.io/convert?from=USD&to=NGN&amount={price_in_dollars}&api_key={settings.CURRENCY_CONVERSION_API_KEY}"
     try:
@@ -168,6 +195,16 @@ def convert_price_to_naira(price_in_dollars):
     except Exception as e:
         print(f"Error converting price: {str(e)}")
         return 1  # Fallback to 1 if conversion fails
+    
+def get_product(product_id):
+    url = f"https://smvaults.com/api/product.php?api_key={SMVAULT_API_KEY}&product={product_id}"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        product = response.json()
+        return product['product']
+    except requests.RequestException as e:
+        return (f"Failed to fetch product {product_id} from SMVault: {str(e)}")
     
 def price(x):
     if x < 10000:

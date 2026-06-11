@@ -50,7 +50,7 @@ Platform {% endblock title %} {% block content %}
 {% endif %} {% comment %} {% if request.user.role != 'admin' %} {% endcomment %}
 <div class="card pad" style="margin-top: 2rem">
   <h3>Purchase {{ platform.name }} Accounts</h3>
-  <form id="purchase-form" method="POST" action="{% url 'store:purchase' %}">
+  <form id="purchase-form" method="POST" action="{% url 'store:purchase' %}" data-max="{{ platform.quantity }}" data-price="{{ platform.price }}">
     {% csrf_token %}
     <div class="form-stack">
       <div class="field">
@@ -94,13 +94,7 @@ Platform {% endblock title %} {% block content %}
         type="submit"
         class="btn btn-primary"
         id="purchase-btn"
-        {%
-        if
-        platform.quantity=""
-        ="0"
-        %}disabled{%
-        endif
-        %}
+        {% if platform.quantity == 0 %}disabled{% endif %}
       >
         {% if platform.quantity == 0 %}No Accounts Available{% else %}Purchase
         Now{% endif %}
@@ -135,18 +129,25 @@ Platform {% endblock title %} {% block content %}
 <div style="height: 12px"></div>
 <div class="card pad">
   <div class="stat-title">Price per Account</div>
-  <div class="stat-value price" data-price="{{ sm_platform.price }}" data-currency="ngn">₦{{ sm_platform.price|floatformat:2 }}</div>
+  <div
+    class="stat-value price"
+    data-price="{{ sm_platform.price }}"
+    data-currency="ngn"
+  >
+    &#8358;{{ sm_platform.price_naira }}
+  </div>
 </div>
 <div style="height: 12px"></div>
 <div class="card pad">
-  <div class="stat-title">Max Quantity</div>
-  <div class="stat-value">{{ sm_platform.max }}</div>
+  <div class="stat-title">Quantity</div>
+  <div class="stat-value" id="amount">{{ sm_platform.amount }}</div>
 </div>
 <div style="height: 12px"></div>
-{% comment %} <div class="card pad">
-  <div class="stat-title">Date Added</div>
-  <div class="stat-value">{{ sm_platform.created_at|date:"M d, Y" }}</div>
-</div> {% endcomment %}
+<div class="card pad">
+  <div class="stat-title">Product ID</div>
+  <div class="stat-value">{{ sm_platform.id }}</div>
+</div>
+
 <div style="height: 12px"></div>
 {% if request.user.role == 'admin' %}
 <a href="{% url 'store:edit_platform' sm_platform.id %}" class="btn"
@@ -158,7 +159,7 @@ Platform {% endblock title %} {% block content %}
 {% endif %} {% comment %} {% if request.user.role != 'admin' %} {% endcomment %}
 <div class="card pad" style="margin-top: 2rem">
   <h3>Purchase {{ sm_platform.name }} Accounts</h3>
-  <form id="purchase-form" method="POST" action="{% url 'store:purchase' %}">
+  <form id="purchase-form" method="POST" action="{% url 'store:purchase_sm_platforms' %}" data-max="{{ sm_platform.amount }}" data-price="{{ sm_platform.price }}">
     {% csrf_token %}
     <div class="form-stack">
       <div class="field">
@@ -167,7 +168,7 @@ Platform {% endblock title %} {% block content %}
           <button
             type="button"
             class="minus-btn btn btn-sm btn-outline"
-            onclick="decreaseQuantity()"
+            onclick="decreaseSmPlatformQuantity()"
           >
             −
           </button>
@@ -177,7 +178,7 @@ Platform {% endblock title %} {% block content %}
             name="quantity"
             value="1"
             min="1"
-            max="{{ sm_platform.quantity }}"
+            max="{{ sm_platform.amount }}"
             class="input"
             style="width: 100px; text-align: center"
             readonly
@@ -185,7 +186,7 @@ Platform {% endblock title %} {% block content %}
           <button
             type="button"
             class="plus-btn btn btn-sm btn-outline"
-            onclick="increaseQuantity()"
+            onclick="increaseSmPlatformQuantity()"
           >
             +
           </button>
@@ -194,24 +195,20 @@ Platform {% endblock title %} {% block content %}
 
       <div class="field">
         <label>Total Price</label>
-        <div class="stat-value" id="total-price">
-          ₦{{ sm_platform.price|floatformat:2 }}
+        <div class="stat-value price" id="total-price" data-price="{{ sm_platform.price }}" data-currency="ngn">
+          ₦{{ sm_platform.price_naira }}
         </div>
       </div>
+      <input type="hidden" id="total_price_input" name="total_price" value="0" />
+      <span id="hello" style="display:none"></span>
       <input type="hidden" name="platform_id" value="{{ sm_platform.id }}" />
       <button
         type="submit"
         class="btn btn-primary"
         id="purchase-btn"
-        {%
-        if
-        sm_platform.quantity=""
-        ="0"
-        %}disabled{%
-        endif
-        %}
+        {% if sm_platform.amount == 0 %}disabled{% endif %}
       >
-        {% if sm_platform.quantity == 0 %}No Accounts Available{% else %}Purchase
+        {% if sm_platform.amount == 0 %}No Accounts Available{% else %}Purchase
         Now{% endif %}
       </button>
     </div>
@@ -252,42 +249,10 @@ Platform {% endblock title %} {% block content %}
       p.after(btn);
     }
   });
-  const maxQuantity = {{ platform.quantity }};
-  const pricePerAccount = {{ platform.price }};
-
-  function updateTotal() {
-    const quantity = parseInt(document.getElementById('quantity').value);
-    const total = quantity * pricePerAccount;
-    document.getElementById('total-price').textContent = '₦' + total.toFixed(2);
-  }
-
-  function increaseQuantity() {
-    const quantityInput = document.getElementById('quantity');
-    if (parseInt(quantityInput.value) < maxQuantity) {
-      quantityInput.value = parseInt(quantityInput.value) + 1;
-      updateTotal();
-    }
-  }
-
-  function decreaseQuantity() {
-    const quantityInput = document.getElementById('quantity');
-    if (parseInt(quantityInput.value) > 1) {
-      quantityInput.value = parseInt(quantityInput.value) - 1;
-      updateTotal();
-    }
-  }
-
-  document.getElementById('purchase-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const quantity = parseInt(document.getElementById('quantity').value);
-    if (quantity < 1 || quantity > maxQuantity) {
-      alert('Please select a valid quantity');
-      return;
-    }
-
-    // Submit the form
-    this.submit();
-  });
 </script>
+{% if platform %}
+<script src="{% static 'js/update_quantity.js' %}"></script>
+{% elif sm_platform %}
+<script src="{% static 'js/update_quantity2.js' %}"></script>
+{% endif %}
 {% endblock content %}

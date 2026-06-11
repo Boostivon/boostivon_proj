@@ -12,6 +12,5 @@ class EmailVerificationAdmin(admin.ModelAdmin):
     search_fields = ('user__email', 'user__username')
     list_filter = ('verified','created_at')
 
-
 admin.site.register(User, UserAdmin)
 admin.site.register(EmailVerification, EmailVerificationAdmin)

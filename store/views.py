@@ -2,14 +2,14 @@ import json
 import uuid
 from decimal import Decimal
 
-from accounts.utils import get_platform_products, list_platforms
+from accounts.utils import buy_product, convert_price_to_naira, get_platform_products, get_product, list_platforms
 import requests
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import CreateOrderForm, PlatformForm, SocialMediaAccountForm, ServiceForm
-from .models import Platform, Service, Order, SocialMediaAccount, AccountOrder, UserPlatformAccount
+from .models import MySMVaultProduct, Platform, Service, Order, SocialMediaAccount, AccountOrder, UserPlatformAccount
 from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
 from .providers.the_owlet import TheOwletAPI
@@ -259,6 +259,13 @@ def view_platform(request, platform_id):
     sm_platform = get_platform_products(platform_id)
     if isinstance(sm_platform, list) and sm_platform:
         sm_platform = sm_platform[0]
+    if isinstance(sm_platform, dict):
+        try:
+            converted_price = convert_price_to_naira(sm_platform["price"])
+        except Exception:
+            converted_price = Decimal('0.00')
+            
+        sm_platform['price_naira'] = converted_price
 
     return render(request, 'store/view-platform.html', {'platform': platform or None, 'sm_platform': sm_platform})
 
@@ -352,10 +359,12 @@ def my_accounts(request):
     """Display accounts purchased by the user"""
     user_accounts = UserPlatformAccount.objects.filter(user=request.user).select_related('account', 'account_order')
     account_orders = AccountOrder.objects.filter(user=request.user, status='completed').order_by('-created_at')
+    mysmproducts = MySMVaultProduct.objects.filter(user=request.user).order_by('-created_at')
     
     return render(request, 'store/my_accounts.html', {
         'user_accounts': user_accounts,
         'account_orders': account_orders,
+        'mysmproducts':mysmproducts
     })
 
 @login_required(login_url='login')
@@ -371,34 +380,30 @@ def purchase(request):
         try:
             platform = Platform.objects.get(id=platform_id)
         except Platform.DoesNotExist:
-            sm_platform = get_platform_products(platform_id)
-        except Exception:
             messages.error(request, 'Platform not found')
             return redirect('store:platform_list')
-        if platform:
-            # Check if enough accounts are available
-            available_accounts = SocialMediaAccount.objects.filter(
-                platform=platform
-            ).exclude(
-                id__in=UserPlatformAccount.objects.values_list('account_id', flat=True)
-            ).count()
-            
-            if available_accounts < quantity:
-                messages.error(request, f'Only {available_accounts} accounts available for {platform.name}')
-                return redirect('store:view_platform', platform_id=platform.id)
-            
-            # Create the order
-            order = AccountOrder.objects.create(
-                user=request.user,
-                platform=platform,
-                quantity=quantity,
-                status='pending'
-            )
-            
-            # Redirect to payment initialization
-            return redirect('store:initialize_product_purchase', order_id=order.order_id)
-        elif sm_platform:
-            ...
+        
+        # Check if enough accounts are available
+        available_accounts = SocialMediaAccount.objects.filter(
+            platform=platform
+        ).exclude(
+            id__in=UserPlatformAccount.objects.values_list('account_id', flat=True)
+        ).count()
+        
+        if available_accounts < quantity:
+            messages.error(request, f'Only {available_accounts} accounts available for {platform.name}')
+            return redirect('store:view_platform', platform_id=platform.id)
+        
+        # Create the order
+        order = AccountOrder.objects.create(
+            user=request.user,
+            platform=platform,
+            quantity=quantity,
+            status='pending'
+        )
+        
+        # Redirect to payment initialization
+        return redirect('store:initialize_product_purchase', order_id=order.order_id)
     
     messages.error(request, 'Invalid request method')
     return redirect('store:platform_list')
@@ -446,3 +451,50 @@ def admin_order_detail(request, order_id):
 
 def terms_and_conditions(request):
     return render(request, 'store/terms-and-conditions.html')
+
+def purchase_sm_platforms(request):
+    if request.method == 'POST':
+        platform_id = request.POST.get('platform_id')
+        quantity = int(request.POST.get('quantity', 1))
+        total_price =  Decimal(request.POST.get('total_price'))
+        
+        
+        if not platform_id or quantity <= 0:
+            messages.error(request, 'Invalid platform or quantity')
+            return redirect('store:platform_list')
+        
+        # check if total price is greater than wallet balance
+        
+        product = get_platform_products(platform_id)[0]
+        
+        
+        if request.user.wallet_balance < total_price:
+            messages.error(request, 'Insufficient wallet balance. Please fund your wallet to complete the purchase.')
+            return redirect('fund_wallet')
+        
+        request.user.wallet_balance -= total_price
+        request.user.save()
+        # Call SMVault API to buy product
+        response = buy_product(product_id=platform_id, amount=quantity)
+        print(f"====> SMVault API response: {response}")
+        
+        if response["status"] == "success":
+            # Create an account order record
+            for acct in response['data']:
+                account_order = MySMVaultProduct.objects.create(
+                    name=product['name'],
+                    user=request.user,
+                    order_id=response['trans_id'],
+                    logs=str(acct)
+                )
+            
+                account_order.save()
+            
+            messages.success(request, f'Purchase successful!')
+            return redirect('store:my_accounts')
+        else:
+            messages.error(request, f'Purchase failed: {response["msg"]}')
+            return redirect('store:view_platform', platform_id=platform_id)
+    
+    messages.error(request, 'Invalid request method')
+    return redirect('store:platform_list')
