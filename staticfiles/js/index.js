@@ -46,7 +46,7 @@ $(document).ready(function() {
                     icon: 'error',
                     title: 'Failed to send verification email'
                 });
-                console.error('Error:', xhr.responseText);
+                // console.error('Error:', xhr.responseText);
             }
         });
     });

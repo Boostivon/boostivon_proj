@@ -11,7 +11,7 @@ async function convertToNaira(amount) {
         const converted = parseFloat(data.price_in_naira);
         return Number.isNaN(converted) ? amount : converted;
     } catch (error) {
-        console.error('Currency conversion failed:', error);
+        // console.error('Currency conversion failed:', error);
         return amount;
     }
 }
@@ -71,10 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (totalPriceEl) {
                 totalPriceEl.textContent = adjustedPrice.toFixed(2);
                 totalPriceEl.dataset.adjustedPrice = adjustedPrice.toFixed(2);
-                console.log(totalPriceEl.textContent);
+                // console.log(totalPriceEl.textContent);
             }
             document.dispatchEvent(new CustomEvent('adjustedPriceReady', { detail: { adjustedPrice } }));
-            console.log(`Converted price:${price} ${nairaPrice} → ₦${adjustedPrice}`);
+            // console.log(`Converted price:${price} ${nairaPrice} → ₦${adjustedPrice}`);
         })();
     });
 });
