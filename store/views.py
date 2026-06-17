@@ -2,7 +2,7 @@ import json
 import uuid
 from decimal import Decimal
 
-from accounts.utils import buy_product, convert_price_to_naira, get_platform_products, get_product, list_platforms
+from accounts.utils import buy_product, convert_price_to_naira, get_platform_products, get_product, list_platforms, bulk_email
 import requests
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
@@ -93,6 +93,11 @@ def initialize_payment(request, order_id):
             order.provider_order_id = provider_response.get('provider_order_id')
             order.provider_status = 'failed'
             order.save()
+            try:
+                bulk_email('boostivon@outlook.com', f'Order Issue #{order.provider_order_id} from {request.user.email}', f'{order.provider_response}')
+            except:
+                pass
+            
             title = 'Order Processing Failed'
             message = 'Payment was successful, but there was an issue processing your order with the provider. Please contact support.'
             success = False
