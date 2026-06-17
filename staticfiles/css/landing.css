@@ -1,25 +1,25 @@
 :root {
-  --accent-start: #051edb;
-  --accent-end: #00b1fb;
+  --accent-start: #FBBF24;
+  --accent-end: #D97706;
   --white: #ffffff;
-  --dark: #071028;
-  --muted: #64748b;
-  --border: #e2e8f0;
-  --light-bg: #f8fafc;
-  --shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 20px 60px rgba(15, 23, 42, 0.12);
+  --dark: #0F0F0F;
+  --muted: #A8A29E;
+  --border: #374151;
+  --light-bg: #1F2937;
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
   --radius: 12px;
   --gradient: linear-gradient(90deg, var(--accent-start), var(--accent-end));
-  --bg: #ffffff;
-  --fg: #1f2937;
+  --bg: #0F0F0F;
+  --fg: #FFFFFF;
 }
 
 /* Dark mode */
 body.dark-mode {
-  --bg: #0f172a;
-  --fg: #f1f5f9;
-  --border: #1e293b;
-  --light-bg: #1e293b;
+  --bg: #0F0F0F;
+  --fg: #FFFFFF;
+  --border: #374151;
+  --light-bg: #1F2937;
 }
 
 * {
@@ -65,12 +65,12 @@ a {
 .btn-primary {
   background: var(--gradient);
   color: white;
-  box-shadow: 0 4px 15px rgba(5, 30, 219, 0.2);
+  box-shadow: 0 4px 15px rgba(251, 191, 36, 0.18);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(5, 30, 219, 0.3);
+  box-shadow: 0 8px 25px rgba(251, 191, 36, 0.32);
 }
 
 .btn-outline {
@@ -90,7 +90,7 @@ a {
 }
 
 .btn-outline.btn-white:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   border-color: white;
 }
 
@@ -136,9 +136,9 @@ a {
   top: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(15, 15, 15, 0.96);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   z-index: 999;
   padding: 0.8rem 0;
   transition: all 0.3s ease;
@@ -846,7 +846,7 @@ body.dark-mode .footer {
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 50%;
   font-size: 1rem;
   transition: all 0.3s ease;

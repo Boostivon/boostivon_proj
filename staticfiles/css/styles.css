@@ -1,73 +1,72 @@
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --accent-start: #051edb;
-  --accent-end: #00b1fb;
-  --white: #ffffff;
+  --background: #0F0F0F;
+  --foreground: #FFFFFF;
+  --accent-start: #FBBF24;
+  --accent-end: #D97706;
+  --white: #FFFFFF;
   --black: #000000;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --card: #ffffff;
-  --border: #e2e8f0;
-  --primary: #14b8a6;
-  --primary-foreground: #ffffff;
-  --danger: #dc2626;
-  --warning: #d97706;
-  --success: #16a34a;
+  --muted: #1F2937;
+  --muted-foreground: #D1D5DB;
+  --card: #1F2937;
+  --border: #3F3F46;
+  --primary: #FBBF24;
+  --primary-foreground: #000000;
+  --danger: #DC2626;
+  --warning: #FBBF24;
+  --success: #22C55E;
   --radius: 12px;
-  --shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
+  --shadow: 0 10px 35px rgba(0, 0, 0, 0.55);
 }
 
 .light {
-  /* explicit light theme (same as default) */
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --card: #ffffff;
-  --border: #e2e8f0;
-  --primary: #14b8a6;
-  --primary-foreground: #ffffff;
-  --white: #ffffff;
+  /* explicit light theme aligned with project black-gold styling */
+  --background: #0F0F0F;
+  --foreground: #FFFFFF;
+  --muted: #1F2937;
+  --muted-foreground: #D1D5DB;
+  --card: #171717;
+  --border: #3F3F46;
+  --primary: #FBBF24;
+  --primary-foreground: #000000;
+  --white: #FFFFFF;
   --black: #000000;
-  --shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
+  --shadow: 0 10px 35px rgba(0, 0, 0, 0.55);
 }
 
 .dark {
-  --background: #090f1c;
-  --foreground: #e2e8f0;
-  --muted: #111827;
-  --muted-foreground: #94a3b8;
-  --card: #111827;
-  --border: #1f2937;
-  --primary: #14b8a6;
+  --background: #0F0F0F;
+  --foreground: #F8F7F2;
+  --muted: #1F2937;
+  --muted-foreground: #D1D5DB;
+  --card: #171717;
+  --border: #3F3F46;
+  --primary: #FBBF24;
   --primary-foreground: #000000;
-  --danger: #ef4444;
-  --warning: #f59e0b;
-  --success: #22c55e;
-  --shadow: 0 8px 28px rgba(2, 6, 23, 0.45);
-  /* swap white/black in dark mode */
-  --white: #000000;
-  --black: #ffffff;
+  --danger: #DC2626;
+  --warning: #FBBF24;
+  --success: #22C55E;
+  --shadow: 0 10px 35px rgba(0, 0, 0, 0.55);
+  --white: #FFFFFF;
+  --black: #000000;
 }
 
 /* System preference fallback: if user hasn't forced light/dark, respect OS */
 @media (prefers-color-scheme: dark) {
   :root:not(.light):not(.dark) {
-    --background: #090f1c;
-    --foreground: #e2e8f0;
-    --muted: #111827;
-    --muted-foreground: #94a3b8;
-    --card: #111827;
-    --border: #1f2937;
-    --primary: #14b8a6;
+    --background: #0F0F0F;
+    --foreground: #F8F7F2;
+    --muted: #1F2937;
+    --muted-foreground: #D1D5DB;
+    --card: #171717;
+    --border: #3F3F46;
+    --primary: #FBBF24;
     --primary-foreground: #000000;
-    --danger: #ef4444;
-    --warning: #f59e0b;
-    --success: #22c55e;
-    --shadow: 0 8px 28px rgba(2, 6, 23, 0.45);
-    --white: #000000;
-    --black: #ffffff;
+    --danger: #DC2626;
+    --warning: #FBBF24;
+    --success: #22C55E;
+    --shadow: 0 10px 35px rgba(0, 0, 0, 0.55);
+    --white: #FFFFFF;
+    --black: #000000;
   }
 }
 
@@ -145,8 +144,8 @@ a {
   place-items: center;
   padding: 2rem 1rem;
   background:
-    radial-gradient(circle at top right, rgba(20, 184, 166, 0.12), transparent 45%),
-    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.08), transparent 45%),
+    radial-gradient(circle at top right, rgba(251, 191, 36, 0.16), transparent 40%),
+    radial-gradient(circle at bottom left, rgba(217, 119, 6, 0.1), transparent 40%),
     var(--background);
 }
 
@@ -830,8 +829,8 @@ a {
   width: 300px;
 }
 .plus, .minus{
-  background-color: #051edb;
-  color: #fff;
+  background-color: var(--primary);
+  color: var(--black);
   margin: 0 10px;
 }
 @media (max-width: 1280px) {

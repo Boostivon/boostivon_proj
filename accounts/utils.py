@@ -35,15 +35,17 @@ def send_verification_code(user, verification_code):
     # Create HTML email body
     html_message = f"""
     <html>
-        <body style="font-family:Arial,sans-serif;margin:20px">
-            <h2>Email Verification</h2>
-            <p>Hello {user.username},</p>
-            <p>Thank you for registering with Boostivon! To complete your registration, please use the following verification code:</p>
-            <h1 style="color:#0b76c2;letter-spacing:2px;font-size:2em;margin:30px 0">{code}</h1>
-            <p>This code will expire in 15 minutes.</p>
-            <p>If you did not create this account, please ignore this email.</p>
-            <hr>
-            <p style="color:#666;font-size:0.9em">Boostivon • {settings.ALLOWED_HOSTS[0] if settings.ALLOWED_HOSTS else 'boostivon.com'}</p>
+        <body style="font-family:Arial,sans-serif;margin:20px;background:#0F0F0F;color:#FFFFFF;">
+            <div style="max-width: 640px; margin: auto; padding: 24px; border-radius: 18px; background: #1F2937; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);">
+                <h2 style="margin-top: 0; color: #FBBF24;">Email Verification</h2>
+                <p style="color: #D1D5DB;">Hello {user.username},</p>
+                <p style="color: #D1D5DB;">Thank you for registering with Boostivon! To complete your registration, please use the following verification code:</p>
+                <h1 style="color:#FBBF24;letter-spacing:2px;font-size:2em;margin:30px 0">{code}</h1>
+                <p style="color: #D1D5DB;">This code will expire in 15 minutes.</p>
+                <p style="color: #D1D5DB;">If you did not create this account, please ignore this email.</p>
+                <hr style="border:none;border-top:1px solid rgba(251,191,36,0.2);">
+                <p style="color:#D1D5DB;font-size:0.9em;">Boostivon • {settings.ALLOWED_HOSTS[0] if settings.ALLOWED_HOSTS else 'boostivon.com'}</p>
+            </div>
         </body>
     </html>
     """
@@ -91,19 +93,21 @@ def send_password_reset_email(request, user, password_reset):
     subject = 'Reset Your Boostivon Password'
     html_message = f"""
     <html>
-        <body style="font-family:Arial,sans-serif;margin:20px">
-            <h2>Password Reset Request</h2>
-            <p>Hello {user.username},</p>
-            <p>We received a request to reset your Boostivon password. Click the button below to reset it now.</p>
-            <p style="text-align:center;margin:30px 0">
-                <a href="{reset_url}" style="display:inline-block;padding:14px 24px;background:#0b76c2;color:#fff;text-decoration:none;border-radius:6px">Reset Password</a>
-            </p>
-            <p>If the button above does not work, copy and paste this link into your browser:</p>
-            <p><a href="{reset_url}">{reset_url}</a></p>
-            <p>This link expires in 30 minutes and can only be used once.</p>
-            <p>If you did not request a password reset, please ignore this email.</p>
-            <hr>
-            <p style="color:#666;font-size:0.9em">Boostivon • www.boostivon.com.ng</p>
+        <body style="font-family:Arial,sans-serif;margin:20px;background:#0F0F0F;color:#FFFFFF;">
+            <div style="max-width: 640px; margin: auto; padding: 24px; border-radius: 18px; background: #1F2937; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);">
+                <h2 style="margin-top: 0; color: #FBBF24;">Password Reset Request</h2>
+                <p style="color: #D1D5DB;">Hello {user.username},</p>
+                <p style="color: #D1D5DB;">We received a request to reset your Boostivon password. Click the button below to reset it now.</p>
+                <p style="text-align:center;margin:30px 0">
+                    <a href="{reset_url}" style="display:inline-block;padding:14px 24px;background:#FBBF24;color:#000000;text-decoration:none;border-radius:6px;border:1px solid #D97706;">Reset Password</a>
+                </p>
+                <p style="color: #D1D5DB;">If the button above does not work, copy and paste this link into your browser:</p>
+                <p><a href="{reset_url}" style="color:#FBBF24;">{reset_url}</a></p>
+                <p style="color: #D1D5DB;">This link expires in 30 minutes and can only be used once.</p>
+                <p style="color: #D1D5DB;">If you did not request a password reset, please ignore this email.</p>
+                <hr style="border:none;border-top:1px solid rgba(251,191,36,0.2);">
+                <p style="color:#D1D5DB;font-size:0.9em">Boostivon • www.boostivon.com.ng</p>
+            </div>
         </body>
     </html>
     """
@@ -186,16 +190,23 @@ def buy_product(product_id, amount, coupon=""):
     return result
    
 def convert_price_to_naira(price_in_dollars):
-    url = f"https://api.fastforex.io/convert?from=USD&to=NGN&amount={price_in_dollars}&api_key={settings.CURRENCY_CONVERSION_API_KEY}"
+    """Convert USD amount to NGN using stored ExchangeRate.
+
+    Falls back to calling the external API once if no stored rate exists.
+    Returns Decimal or float-like value.
+    """
     try:
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
-        exchange_rate = data['result']['NGN']
-        return exchange_rate
+        from store.utils import get_exchange_rate, update_exchange_rate
+        rate = get_exchange_rate('USD', 'NGN')
+        # if rate is 1 (fallback) try updating once
+        if rate == 1 or rate == '1' or float(rate) == 1.0:
+            updated = update_exchange_rate('USD', 'NGN')
+            if updated:
+                rate = updated
+        return float(rate) * float(price_in_dollars)
     except Exception as e:
         print(f"Error converting price: {str(e)}")
-        return 1  # Fallback to 1 if conversion fails
+        return float(price_in_dollars)
     
 def get_product(product_id):
     url = f"https://smvaults.com/api/product.php?api_key={SMVAULT_API_KEY}&product={product_id}"
@@ -218,12 +229,12 @@ def bulk_email(user, email_subject, email_body):
     subject = email_subject or 'Boostivon Update'
     html_message = f"""
     <html>
-      <body style="font-family:Arial,sans-serif;margin:20px;color:#1f2937;">
-        <div style="max-width:680px;margin:auto;padding:24px;border-radius:18px;background:#ffffff;box-shadow:0 20px 50px rgba(15,23,42,0.08);">
-          <h2 style="margin-bottom:0.5rem;color:#111827;">{subject}</h2>
-          <div style="margin-bottom:1.5rem;color:#475569;line-height:1.75;">{email_body}</div>
-          <hr style="border:none;border-top:1px solid rgba(148,163,184,0.18);margin:24px 0;" />
-          <p style="color:#64748b;font-size:0.9rem;">Boostivon • boostivon.com.ng</p>
+      <body style="font-family:Arial,sans-serif;margin:20px;background:#0F0F0F;color:#FFFFFF;">
+        <div style="max-width:680px;margin:auto;padding:24px;border-radius:18px;background:#1F2937;box-shadow:0 20px 50px rgba(0,0,0,0.55);">
+          <h2 style="margin-bottom:0.5rem;color:#FBBF24;">{subject}</h2>
+          <div style="margin-bottom:1.5rem;color:#D1D5DB;line-height:1.75;">{email_body}</div>
+          <hr style="border:none;border-top:1px solid rgba(251,191,36,0.2);margin:24px 0;" />
+          <p style="color:#D1D5DB;font-size:0.9rem;">Boostivon • boostivon.com.ng</p>
         </div>
       </body>
     </html>

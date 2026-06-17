@@ -49,7 +49,10 @@ console.log(calculateMarkedUpPrice(20100))
 document.addEventListener('DOMContentLoaded', () => {
     const priceElements = document.querySelectorAll('.price[data-price]');
     // get input with name platform_price
-    let totalPriceEl = document.getElementById('hello');
+    const totalPriceEl = document.getElementById('hello');
+    if (!totalPriceEl) {
+        console.warn('price.js: element #hello not found; adjusted price values will not be stored.');
+    }
 
     priceElements.forEach(element => {
         const price = parseFloat(element.getAttribute('data-price'));
@@ -65,10 +68,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const adjustedPrice = calculateMarkedUpPrice(nairaPrice);
             // add comma separators for thousands
             element.innerHTML = `₦${adjustedPrice.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')} Each`;
-            totalPriceEl.textContent = adjustedPrice.toFixed(2);
-            totalPriceEl.dataset.adjustedPrice = adjustedPrice.toFixed(2);
+            if (totalPriceEl) {
+                totalPriceEl.textContent = adjustedPrice.toFixed(2);
+                totalPriceEl.dataset.adjustedPrice = adjustedPrice.toFixed(2);
+                console.log(totalPriceEl.textContent);
+            }
             document.dispatchEvent(new CustomEvent('adjustedPriceReady', { detail: { adjustedPrice } }));
-            console.log(totalPriceEl.textContent);
             console.log(`Converted price:${price} ${nairaPrice} → ₦${adjustedPrice}`);
         })();
     });
