@@ -5,11 +5,12 @@ from decimal import Decimal
 from accounts.utils import buy_product, convert_price_to_naira, get_platform_products, get_product, list_platforms, bulk_email
 import requests
 from django.conf import settings
+from django.db import transaction as db_transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import CreateOrderForm, PlatformForm, SocialMediaAccountForm, ServiceForm
-from .models import MySMVaultProduct, Platform, Service, Order, SocialMediaAccount, AccountOrder, UserPlatformAccount
+from .models import MySMVaultProduct, Platform, Service, Order, SocialMediaAccount, AccountOrder, UserPlatformAccount, SMVaultOrder
 from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
 from .providers.the_owlet import TheOwletAPI
@@ -364,11 +365,13 @@ def my_accounts(request):
     """Display accounts purchased by the user"""
     user_accounts = UserPlatformAccount.objects.filter(user=request.user).select_related('account', 'account_order')
     account_orders = AccountOrder.objects.filter(user=request.user, status='completed').order_by('-created_at')
-    mysmproducts = MySMVaultProduct.objects.filter(user=request.user).order_by('-created_at')
+    smvault_orders = SMVaultOrder.objects.filter(user=request.user, status='completed').order_by('-created_at')
+    mysmproducts = MySMVaultProduct.objects.filter(user=request.user).select_related('smvault_order').order_by('-created_at')
     
     return render(request, 'store/my_accounts.html', {
         'user_accounts': user_accounts,
         'account_orders': account_orders,
+        'smvault_orders': smvault_orders,
         'mysmproducts':mysmproducts
     })
 
@@ -457,6 +460,7 @@ def admin_order_detail(request, order_id):
 def terms_and_conditions(request):
     return render(request, 'store/terms-and-conditions.html')
 
+@login_required(login_url='login')
 def purchase_sm_platforms(request):
     if request.method == 'POST':
         platform_id = request.POST.get('platform_id')
@@ -477,28 +481,39 @@ def purchase_sm_platforms(request):
             messages.error(request, 'Insufficient wallet balance. Please fund your wallet to complete the purchase.')
             return redirect('fund_wallet')
         
-        request.user.wallet_balance -= total_price
-        request.user.save()
         # Call SMVault API to buy product
         response = buy_product(product_id=platform_id, amount=quantity)
         print(f"====> SMVault API response: {response}")
         
-        if response["status"] == "success":
-            # Create an account order record
-            for acct in response['data']:
-                account_order = MySMVaultProduct.objects.create(
-                    name=product['name'],
+        if response.get("status") == "success":
+            with db_transaction.atomic():
+                request.user.wallet_balance -= total_price
+                request.user.save()
+
+                smvault_order = SMVaultOrder.objects.create(
                     user=request.user,
-                    order_id=response['trans_id'],
-                    logs=str(acct)
+                    product_id=platform_id,
+                    product_name=product['name'],
+                    quantity=quantity,
+                    total_price=total_price,
+                    status='completed',
+                    provider_order_id=response.get('trans_id'),
+                    provider_response=response
                 )
-            
-                account_order.save()
+
+                for acct in response.get('data', []):
+                    MySMVaultProduct.objects.create(
+                        smvault_order=smvault_order,
+                        name=product['name'],
+                        user=request.user,
+                        order_id=smvault_order.order_id,
+                        logs=str(acct)
+                    )
             
             messages.success(request, f'Purchase successful!')
             return redirect('store:my_accounts')
         else:
-            messages.error(request, f'Purchase failed: {response["msg"]}')
+            messages.error(request, f'Purchase failed: {response.get("msg", "Please try again.")}')
             return redirect('store:view_platform', platform_id=platform_id)
     
     messages.error(request, 'Invalid request method')

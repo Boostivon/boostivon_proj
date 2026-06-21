@@ -9,4 +9,4 @@ class UserRegisterForm(UserCreationForm):
     password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'input', 'placeholder': 'confirm password', 'required': True}))
     class Meta:
         model = User
-        fields = ('email', 'username', 'password1', 'password2')
+        fields = ('email', 'username', 'password1', 'password2')    

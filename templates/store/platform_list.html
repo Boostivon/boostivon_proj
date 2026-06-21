@@ -16,16 +16,7 @@
 <div style="height: 20px;"></div>
 <div class="table-wrap">
   <table class="table">
-    <thead>
-      <tr>
-        <th>Icon</th>
-        <th>Platform</th>
-        {% comment %} <th>Username</th> {% endcomment %}
-        <th class="text-right">Price</th>
-        {% comment %} <th class="text-right">Date Added</th> {% endcomment %}
-        <th></th>
-      </tr>
-    </thead>
+    
     <tbody>
       {% if not products and not sm_platforms %}
         <tr>
@@ -37,26 +28,40 @@
             <td>
               <img src="{{ product.icon }}" alt="Product Icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;" >
             </td>
-            <td>{{ product.name|title }}</td>
-            {% comment %} <td>{{ product.username }}</td> {% endcomment %}
-            <td class="text-right">₦{{ product.price|floatformat:2 }}</td>
-            {% comment %} <td>
-              <span class="truncated-desc" data-fulltext="{{ product.description|escapejs }}" style="font-size:0.9rem; display:block;">{{ product.description|default:"—"|truncatechars:120 }}</span>
-            </td> {% endcomment %}
-            {% comment %} <td class="text-right">{{ product.created_at|date:'M j, Y' }}</td> {% endcomment %}
-            <td class="actions">
+            <td>
+              {% if product.name|length > 40 %}
+              {{ product.name|title|truncatechars:40 }}...
+              {% else %}
+              {{ product.name|title }}
+              {% endif %}
+
+              <br>
+              <br>
+              {{ product.quantity}}Pcs || ₦{{ product.price|floatformat:2 }}
+
+              <br>
+              <br>
               {% if request.user.role == 'admin' %}
               <span>
-                <a href="{% url 'store:edit_platform' product.id %}" class="btn btn-sm btn-outline"><i class="bi bi-pencil-square"></i></a>
+                <a href="{% url 'store:edit_platform' product.id %}">
+                  {% comment %} <i class="bi bi-pencil-square"></i> {% endcomment %}
+                  Edit
+                </a>
               </span>
+              &nbsp;
               <span>
-                <a href="{% url 'store:delete_platform' product.id %}" class="btn btn-sm btn-outline"><i class="bi bi-trash"></i></a>
+                <a href="{% url 'store:delete_platform' product.id %}">
+                  {% comment %} <i class="bi bi-trash"></i> {% endcomment %}
+                  Delete
+                </a>
               </span>
               {% endif %}
             </td>
+            
             <td>
+              <br>
                 <a href="{% url 'store:view_platform' product.id %}" class="btn btn-sm btn-outline">
-                  <i class="bi bi-eye"></i>
+                  <i class="bi bi-cart-plus"></i>
                 </a>
             </td>
           </tr>
@@ -67,26 +72,22 @@
             <td>
               <img src="{{ cat.icon }}" alt="Product Icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;" >
             </td>
-            <td>{{ prod.name|title }}</td>
-            {% comment %} <td>{{ product.username }}</td> {% endcomment %}
-            <td class="text-right price" data-price="{{ prod.price }}">₦{{ prod.price|floatformat:2 }}</td>
-            {% comment %} <td>
-              <span class="truncated-desc" data-fulltext="{{ product.description|escapejs }}" style="font-size:0.9rem; display:block;">{{ product.description|default:"—"|truncatechars:120 }}</span>
-            </td> {% endcomment %}
-            {% comment %} <td class="text-right">{{ prod.created_at|date:'M j, Y' }}</td> {% endcomment %}
-            <td class="actions">
-              {% if request.user.role == 'admin' %}
-              <span>
-                <a href="{% url 'store:edit_platform' prod.id %}" class="btn btn-sm btn-outline"><i class="bi bi-pencil-square"></i></a>
-              </span>
-              <span>
-                <a href="{% url 'store:delete_platform' prod.id %}" class="btn btn-sm btn-outline"><i class="bi bi-trash"></i></a>
-              </span>
-              {% endif %}
-            </td>
             <td>
+              {% if prod.name|length > 40 %}
+              {{ prod.name|title|truncatechars:40 }}...
+              {% else %}
+              {{ prod.name|title|truncatechars:40 }}...
+              {% endif %}
+              <br>
+              <br>
+              {{ prod.amount}}Pcs || <span class="text-right price" data-price="{{ prod.price }}">₦{{ prod.price|floatformat:2 }}</span>
+            </td>
+  
+            
+            <td>
+              <br>
                 <a href="{% url 'store:view_platform' prod.id %}" class="btn btn-sm btn-outline">
-                  <i class="bi bi-eye"></i>
+                  <i class="bi bi-cart-plus"></i>
                 </a>
             </td>
           </tr>

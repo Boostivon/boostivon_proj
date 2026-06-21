@@ -1,0 +1,24 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Edit Product{% endblock title %}
+{% block content %}
+<div class="page-header">
+  <h1>Edit Product</h1>
+  <p>Update the social media account listing for "{{ product.platform.name }}".</p>
+</div>
+
+<div style="height:12px"></div>
+
+<div class="card pad">
+  <form method="POST">
+    {% csrf_token %}
+    <div class="form-stack">
+      {{ form.as_p }}
+      <div style="height:12px"></div>
+      <button class="btn btn-primary" type="submit">Save Changes</button>
+      <a class="btn btn-outline" href="{% url 'store:product_detail' product.id %}">Back to Product</a>
+      <a class="btn btn-outline" href="{% url 'store:product_list' %}">Product List</a>
+    </div>
+  </form>
+</div>
+{% endblock content %}

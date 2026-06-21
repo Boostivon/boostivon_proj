@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Service, SocialMediaAccount, Transaction, Order, TextToSpeechRequest
+from .models import Service, SocialMediaAccount, Transaction, Order, TextToSpeechRequest, SMVaultOrder
 
 # Register your models here.
 class ServiceAdmin(admin.ModelAdmin):
@@ -33,6 +33,11 @@ class TransactionAdmin(admin.ModelAdmin):
     list_display = ('user', 'amount', 'transaction_type', 'reference', 'created_at')
     search_fields = ('user__email', 'reference')
     list_filter = ('transaction_type', 'created_at')
+
+class SMVaultOrderAdmin(admin.ModelAdmin):
+    list_display = ('order_id', 'user', 'product_name', 'quantity', 'total_price', 'status', 'provider_order_id', 'created_at')
+    search_fields = ('order_id', 'user__email', 'product_name', 'provider_order_id')
+    list_filter = ('status', 'created_at')
     
 # class PlatformAdmin(admin.ModelAdmin):
 #     list_display = ('name', 'price', 'description', 'created_at')
@@ -44,3 +49,4 @@ admin.site.register(SocialMediaAccount, SocialMediaAccountAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(TextToSpeechRequest, TextToSpeechRequestAdmin)
 admin.site.register(Transaction, TransactionAdmin)
+admin.site.register(SMVaultOrder, SMVaultOrderAdmin)

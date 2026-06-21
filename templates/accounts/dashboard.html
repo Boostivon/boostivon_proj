@@ -68,7 +68,7 @@ Dashboard
 {% comment %} display recent products {% endcomment %}
 <div class="table-wrap">
   <table class="table">
-    <thead>
+    {% comment %} <thead>
       <tr>
         <th>Icon</th>
         <th>Platform</th>
@@ -76,7 +76,7 @@ Dashboard
         <th>Price</th>
         
       </tr>
-    </thead>
+    </thead> {% endcomment %}
     <tbody>
       {% if not products and not sm_products %}
         <tr>
@@ -88,16 +88,17 @@ Dashboard
             <td>
             <img src="{{ product.icon }}" alt="Product Icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;" alt="Icon">
           </td>
-          <td>{{ product.name|title }}</td>
-          <td>
-            {{ product.quantity }}Pcs
+          <td>{{ product.name|title }}
+            <br>
+            <br>
+            {{ product.quantity }}Pcs 
+            || ₦{{ product.price|floatformat:2 }} Each
           </td>
-          <td class="text-right">
-            ₦{{ product.price|floatformat:2 }} Each
-          </td>
+          
           <td>
+            <br>
             <a class="btn btn-sm" href="{% url 'store:view_platform' product.id %}">
-              <i class="bi bi-eye"></i>
+              Buy
             </a>
           </td>
         </tr>
@@ -108,16 +109,20 @@ Dashboard
           <td>
             <img src="{{ cat.icon }}" alt="Product Icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;" alt="Icon">
           </td>
-          <td>{{ product.name|title }}</td>
           <td>
-            {{ product.amount }}Pcs
+            {{ product.name|title|truncatechars:40 }}...
+            <br>
+            <br>
+            {{ product.amount }}Pcs || <span class="text-right price" data-price="{{ product.price }}" data-id="{{ product.id }}" data-currency="ngn">Loading…</span>
           </td>
-          <td class="text-right price" data-price="{{ product.price }}" data-id="{{ product.id }}" data-currency="ngn">Loading…</td>
           <td>
+            <br>
             <a class="btn btn-sm" href="{% url 'store:view_platform' product.id %}">
-              <i class="bi bi-eye"></i>
+              {% comment %} <i class="bi bi-eye"></i> {% endcomment %}
+              Buy
             </a>
           </td>
+          
         </tr>
         {% endfor %}
       {% endfor %}

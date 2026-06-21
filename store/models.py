@@ -227,16 +227,39 @@ class UserPlatformAccount(models.Model):
     class Meta:
         unique_together = ('user', 'account')
         
+class SMVaultOrder(models.Model):
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='smvault_orders')
+    order_id = models.CharField(max_length=255, unique=True)
+    product_id = models.CharField(max_length=255)
+    product_name = models.CharField(max_length=1000, blank=True, null=True)
+    quantity = models.IntegerField()
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    provider_order_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    provider_response = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"SMVault Order #{self.order_id} - {self.product_name or self.product_id} x {self.quantity} for {self.user.email}"
+
+    def save(self, *args, **kwargs):
+        if not self.order_id:
+            self.order_id = str(uuid.uuid4())
+        super().save(*args, **kwargs)
+
 class MySMVaultProduct(models.Model):
     user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='smvault_products')
+    smvault_order = models.ForeignKey(SMVaultOrder, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
     name = models.CharField(max_length=1000, blank=True, null=True)
-    order_id = models.CharField(max_length=255, unique=True)
+    order_id = models.CharField(max_length=255)
     logs = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return f"SMVault Product for Order {self.order_id}"
+
 
 
 class ExchangeRate(models.Model):

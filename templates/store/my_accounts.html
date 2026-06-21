@@ -27,8 +27,8 @@
             <td>{{ user_account.account.platform.name|title }}</td>
             <td>
               <details class="account-details">
-                <summary>Details <button type="button" class="btn btn-sm btn-outline copy-btn" data-target-id="details-{{ forloop.counter0 }}">Copy</button></summary>
-                <code id="details-{{ forloop.counter0 }}">{{ user_account.account.logs|default:"No details available" }}</code>
+                <summary>Details <button type="button" class="btn btn-sm btn-outline copy-btn" data-target-id="platform-details-{{ forloop.counter0 }}">Copy</button></summary>
+                <code id="platform-details-{{ forloop.counter0 }}">{{ user_account.account.logs|default:"No details available" }}</code>
               </details>
             </td>
             <td>
@@ -46,8 +46,8 @@
             <td>{{ mysmproduct.name|title }}</td>
             <td>
               <details class="account-details">
-                <summary>Logs <button type="button" class="btn btn-sm btn-outline copy-btn" data-target-id="details-{{ forloop.counter0 }}">Copy</button></summary>
-                <code id="details-{{ forloop.counter0 }}">{{ mysmproduct.logs|default:"No details available" }}</code>
+                <summary>Logs <button type="button" class="btn btn-sm btn-outline copy-btn" data-target-id="smvault-details-{{ forloop.counter0 }}">Copy</button></summary>
+                <code id="smvault-details-{{ forloop.counter0 }}">{{ mysmproduct.logs|default:"No details available" }}</code>
               </details>
             </td>
             <td>
@@ -72,7 +72,7 @@
 
 <div style="height: 40px;"></div>
 
-{% if account_orders %}
+{% if account_orders or smvault_orders %}
   <h2>Purchase History</h2>
   <div style="height: 12px;"></div>
   <div class="table-wrap">
@@ -94,6 +94,18 @@
             <td>{{ order.platform.name|title }}</td>
             <td>{{ order.quantity }}</td>
             <td class="text-right">₦{{ order.total_price|floatformat:2 }}</td>
+            <td>
+              <span class="badge badge-success">{{ order.status|title }}</span>
+            </td>
+            <td class="text-right">{{ order.created_at|date:'M d, Y H:i' }}</td>
+          </tr>
+        {% endfor %}
+        {% for order in smvault_orders %}
+          <tr>
+            <td><code>{{ order.order_id }}</code></td>
+            <td>{{ order.product_name|default:order.product_id|title }}</td>
+            <td>{{ order.quantity }}</td>
+            <td class="text-right">â‚¦{{ order.total_price|floatformat:2 }}</td>
             <td>
               <span class="badge badge-success">{{ order.status|title }}</span>
             </td>
