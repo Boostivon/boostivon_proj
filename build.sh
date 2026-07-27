@@ -8,4 +8,4 @@ python manage.py migrate
 # 4. Create a superuser (optional, for admin access)
 # python manage.py createsuperuser
 # 5. Start the application using Gunicorn
-gunicorn config.wsgi:application --bind 0.0.0.0:8000
+# gunicorn config.wsgi:application --bind 0.0.0.0:8000

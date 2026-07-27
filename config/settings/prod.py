@@ -8,7 +8,7 @@ from .base import *  # noqa: F401,F403
 
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else ['boostivon.com.ng', 'www.boostivon.com.ng','boostivon_proj.onrender.com']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else ['boostivon.com.ng', 'www.boostivon.com.ng','boostivon-proj.onrender.com']
 
 # Use S3 by default in production
 USE_S3 = os.getenv('USE_S3', 'True').lower() in ('1', 'true', 'yes')
