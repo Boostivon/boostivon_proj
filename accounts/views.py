@@ -10,7 +10,7 @@ import resend
 from store.forms import CreateOrderForm
 from store.models import Order, Platform, SocialMediaAccount, TextToSpeechRequest, Service, Transaction
 from store.views import orders
-from .utils import bulk_email, convert_price_to_naira, send_verification_code, send_password_reset_email, list_platforms
+from .utils import bulk_email, convert_price_to_naira, send_verification_code, send_password_reset_email, list_platforms, account_topup_email
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db.models import Count, Q, Sum
@@ -687,6 +687,8 @@ def admin_account_topup(request):
             status='completed',
             reference=f'Admin top-up by {request.user.email}',
         )
+        
+        account_topup_email(user.email, amount)
         
         messages.success(request, f"Successfully topped up {user.email}'s account by ₦{amount:,.2f}.")
         return redirect('admin_account_topup')

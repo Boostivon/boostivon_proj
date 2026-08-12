@@ -252,3 +252,9 @@ def bulk_email(user, email_subject, email_body):
     except Exception as e:
         print(f"Failed to send bulk email to {user}: {str(e)}")
         return False
+
+def account_topup_email(user, amount):
+    """Send an email notification about an admin account top-up."""
+    subject = "Account Top-up Alert"
+    body = f"Your account has been topped up with {amount}."
+    return bulk_email(user, subject, body)
