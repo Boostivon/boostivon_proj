@@ -649,7 +649,49 @@ def bulk_email_view(request):
         return redirect('home')
     return render(request, 'accounts/send_email.html')
     
+@login_required(login_url='login')
+def admin_account_topup(request):
+    if request.user.role != 'admin':
+        messages.warning(request, "Only admins are allowed here!!!")
+        return redirect('home')
     
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        amount = request.POST.get('amount')
+        
+        if not email or not amount:
+            messages.error(request, "Both email and amount are required.")
+            return redirect('admin_account_topup')
+        
+        try:
+            amount = float(amount)
+            if amount <= 0:
+                messages.error(request, "Amount must be greater than zero.")
+                return redirect('admin_account_topup')
+        except ValueError:
+            messages.error(request, "Invalid amount. Please enter a valid number.")
+            return redirect('admin_account_topup')
+        
+        user = User.objects.filter(email=email).first()
+        if not user:
+            messages.error(request, "User with the provided email does not exist.")
+            return redirect('admin_account_topup')
+        
+        user.wallet_balance += Decimal(amount)
+        user.save()
+        
+        Transaction.objects.create(
+            user=user,
+            amount=Decimal(amount),
+            transaction_type='deposit',
+            status='completed',
+            reference=f'Admin top-up by {request.user.email}',
+        )
+        
+        messages.success(request, f"Successfully topped up {user.email}'s account by ₦{amount:,.2f}.")
+        return redirect('admin_account_topup')
+    
+    return render(request, 'accounts/admin_account_topup.html')
             
     
 

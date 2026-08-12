@@ -1,0 +1,25 @@
+{% extends "partials/base.html" %} {% load static %} {% block title %}Admin Account Topup{% endblock title %}
+{% block content %}
+          <div class="page-header">
+            <h1>Admin Account Topup</h1>
+            <p>Top up your account balance</p>
+          </div>
+          <div style="height: 12px"></div>
+          <form method="POST" action="{% url 'admin_account_topup' %}">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="amount">Amount (₦)</label>
+              <br>
+              <input type="number" id="amount" name="amount" class="input" placeholder="Enter amount to top up" required>
+            </div>
+            <br>
+
+            <div class="form-group">
+              <label for="email">User Email</label>
+              <br>
+              <input type="email" id="email" name="email" class="input" placeholder="Enter user email" required>
+            </div>
+            <br><br>
+            <button type="submit" class="btn btn-primary">Top Up</button>
+          </form>
+{% endblock content %}

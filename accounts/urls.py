@@ -34,4 +34,5 @@ urlpatterns = [
     path('initialize-payment/<amount>/', views.initialize_payment, name='initialize_payment'),
     
     path('convert-price/', views.convert_price_to_naira_view, name='convert_price'),
+    path('admin-account-topup/', views.admin_account_topup, name='admin_account_topup'),
 ]

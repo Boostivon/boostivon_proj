@@ -70,6 +70,7 @@
         <a class="nav-link" href="{% url "admin_users" %}">Admin Users</a>
           <a class="nav-link {% if request.path == '/store/products/' %}active{% endif %}" href="{% url "store:product_list" %}">Product List</a>
           <a class="nav-link {% if 'add-products' in request.path %}active{% endif %}" href="{% url "store:add_products" %}">Add Products</a>
+          <a class="nav-link {% if 'admin-account-topup' in request.path %}active{% endif %}" href="{% url "admin_account_topup" %}">Admin Account Topup</a>
           <a class="nav-link {% if 'services' in request.path %}active{% endif %}" href="{% url "store:service_list" %}">Services</a>
           <a class="nav-link {% if 'inbox' in request.path %}active{% endif %}" href="{% url "inbox" %}">Inbox</a>
           <a class="nav-link {% if 'send-bulk-email' in request.path %}active{% endif %}" href="{% url "bulk_email_view" %}">Bulk Email</a>
